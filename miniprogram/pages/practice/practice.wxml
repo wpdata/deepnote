@@ -1,0 +1,98 @@
+<view class="container">
+  <!-- 进度指示器 -->
+  <view class="progress-indicator">
+    <text class="progress-text">第 {{currentIndex + 1}} / {{questions.length}} 题</text>
+    <view class="progress-bar-bg">
+      <view class="progress-bar" style="width: {{(currentIndex + 1) / questions.length * 100}}%"></view>
+    </view>
+  </view>
+
+  <!-- 题目卡片 -->
+  <view class="question-card">
+    <view class="question-header">
+      <text class="knowledge-point">{{knowledgePoint}}</text>
+      <text class="difficulty {{difficulty}}">{{difficultyText}}</text>
+    </view>
+
+    <view class="question-content">
+      <text class="question-title">题目 {{currentIndex + 1}}</text>
+      <text class="question-text">{{currentQuestion.content}}</text>
+    </view>
+
+    <!-- 选项列表 -->
+    <view class="options-list" wx:if="{{!submitted}}">
+      <view
+        class="option-item {{selectedOption === index ? 'selected' : ''}}"
+        wx:for="{{currentQuestion.options}}"
+        wx:key="index"
+        bindtap="selectOption"
+        data-index="{{index}}"
+      >
+        <view class="option-label">{{optionLabels[index]}}</view>
+        <text class="option-text">{{item}}</text>
+      </view>
+    </view>
+
+    <!-- 答题结果 -->
+    <view class="result-section" wx:if="{{submitted}}">
+      <view class="options-list">
+        <view
+          class="option-item {{item.isCorrect ? 'correct' : ''}} {{item.isWrong ? 'wrong' : ''}}"
+          wx:for="{{currentQuestion.optionsWithResult}}"
+          wx:key="index"
+        >
+          <view class="option-label">{{optionLabels[index]}}</view>
+          <text class="option-text">{{item.text}}</text>
+          <image wx:if="{{item.isCorrect}}" class="result-icon" src="/images/correct.png" mode="aspectFit"></image>
+          <image wx:if="{{item.isWrong}}" class="result-icon" src="/images/wrong.png" mode="aspectFit"></image>
+        </view>
+      </view>
+
+      <view class="result-card {{isCorrect ? 'correct' : 'wrong'}}">
+        <view class="result-header">
+          <image class="result-emoji" src="/images/{{isCorrect ? 'happy' : 'sad'}}.png" mode="aspectFit"></image>
+          <text class="result-title">{{isCorrect ? '回答正确！' : '回答错误'}}</text>
+        </view>
+        <text class="result-explanation">{{currentQuestion.explanation}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 操作按钮 -->
+  <view class="action-buttons">
+    <button class="action-btn secondary" wx:if="{{submitted && currentIndex > 0}}" bindtap="prevQuestion">上一题</button>
+    <button class="action-btn primary" wx:if="{{!submitted}}" bindtap="submitAnswer" disabled="{{selectedOption === null}}">提交答案</button>
+    <button class="action-btn primary" wx:if="{{submitted && currentIndex < questions.length - 1}}" bindtap="nextQuestion">下一题</button>
+    <button class="action-btn success" wx:if="{{submitted && currentIndex === questions.length - 1}}" bindtap="finishPractice">完成练习</button>
+  </view>
+
+  <!-- 练习完成弹窗 -->
+  <view class="finish-modal" wx:if="{{showFinishModal}}">
+    <view class="modal-mask" bindtap="closeModal"></view>
+    <view class="modal-content">
+      <text class="modal-title">练习完成</text>
+      <view class="score-section">
+        <text class="score-label">正确率</text>
+        <text class="score-value">{{correctRate}}%</text>
+      </view>
+      <view class="stats-grid">
+        <view class="stat-box">
+          <text class="stat-number">{{correctCount}}</text>
+          <text class="stat-label">答对</text>
+        </view>
+        <view class="stat-box">
+          <text class="stat-number">{{wrongCount}}</text>
+          <text class="stat-label">答错</text>
+        </view>
+        <view class="stat-box">
+          <text class="stat-number">{{questions.length}}</text>
+          <text class="stat-label">总题数</text>
+        </view>
+      </view>
+      <view class="modal-actions">
+        <button class="modal-btn secondary" bindtap="retryPractice">再练一次</button>
+        <button class="modal-btn primary" bindtap="backToDetail">返回</button>
+      </view>
+    </view>
+  </view>
+</view>

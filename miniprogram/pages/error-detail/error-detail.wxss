@@ -1,0 +1,194 @@
+.container {
+  min-height: 100vh;
+  background-color: #F5F5F5;
+  padding: 20rpx;
+  padding-bottom: 180rpx;
+}
+
+/* 题目卡片 */
+.question-card {
+  background-color: #FFFFFF;
+  border-radius: 16rpx;
+  padding: 30rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.06);
+}
+
+.question-header {
+  display: flex;
+  gap: 12rpx;
+  margin-bottom: 24rpx;
+  flex-wrap: wrap;
+}
+
+.subject-tag,
+.knowledge-tag,
+.mastered-status {
+  padding: 8rpx 20rpx;
+  border-radius: 20rpx;
+  font-size: 24rpx;
+}
+
+.subject-tag {
+  background-color: #E6F4FF;
+  color: #1677FF;
+}
+
+.knowledge-tag {
+  background-color: #FFF7E6;
+  color: #FA8C16;
+}
+
+.mastered-status {
+  background-color: #F0F0F0;
+  color: #999;
+}
+
+.mastered-status.mastered {
+  background-color: #F6FFED;
+  color: #52C41A;
+}
+
+.question-content {
+  margin-bottom: 24rpx;
+}
+
+.content-title {
+  display: block;
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 16rpx;
+}
+
+.content-text {
+  display: block;
+  font-size: 28rpx;
+  line-height: 1.8;
+  color: #666;
+  white-space: pre-wrap;
+}
+
+.question-image {
+  width: 100%;
+  border-radius: 12rpx;
+  margin-top: 20rpx;
+}
+
+/* AI 分析卡片 */
+.analysis-card,
+.related-card {
+  background-color: #FFFFFF;
+  border-radius: 16rpx;
+  padding: 30rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.06);
+}
+
+.card-title {
+  display: flex;
+  align-items: center;
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 24rpx;
+}
+
+.ai-icon {
+  width: 40rpx;
+  height: 40rpx;
+  margin-right: 12rpx;
+}
+
+.analysis-section {
+  margin-bottom: 32rpx;
+}
+
+.analysis-section:last-child {
+  margin-bottom: 0;
+}
+
+.section-title {
+  display: block;
+  font-size: 26rpx;
+  font-weight: 600;
+  color: #1677FF;
+  margin-bottom: 12rpx;
+}
+
+.section-content {
+  display: block;
+  font-size: 28rpx;
+  line-height: 1.8;
+  color: #666;
+  white-space: pre-wrap;
+}
+
+.section-content.warning {
+  color: #FA541C;
+  background-color: #FFF2E8;
+  padding: 16rpx;
+  border-radius: 8rpx;
+  border-left: 6rpx solid #FA541C;
+}
+
+/* 相关知识点 */
+.tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16rpx;
+}
+
+.tag-item {
+  padding: 12rpx 24rpx;
+  background-color: #F5F5F5;
+  border-radius: 20rpx;
+  font-size: 24rpx;
+  color: #666;
+}
+
+/* 底部操作按钮 */
+.bottom-actions {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  gap: 20rpx;
+  padding: 20rpx;
+  background-color: #FFFFFF;
+  border-top: 1rpx solid #F0F0F0;
+  box-shadow: 0 -4rpx 12rpx rgba(0, 0, 0, 0.06);
+}
+
+.action-btn {
+  flex: 1;
+  height: 88rpx;
+  border-radius: 44rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28rpx;
+  border: none;
+}
+
+.action-btn.primary {
+  background-color: #1677FF;
+  color: #FFFFFF;
+}
+
+.action-btn.primary.mastered {
+  background-color: #52C41A;
+}
+
+.action-btn.secondary {
+  background-color: #FFFFFF;
+  color: #333;
+  border: 2rpx solid #D9D9D9;
+}
+
+.btn-icon {
+  width: 32rpx;
+  height: 32rpx;
+  margin-right: 8rpx;
+}

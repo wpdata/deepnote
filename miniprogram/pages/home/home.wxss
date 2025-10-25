@@ -1,0 +1,147 @@
+.container {
+  padding: 20rpx;
+  background-color: #F5F5F5;
+  min-height: 100vh;
+}
+
+/* 顶部栏 */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20rpx 0;
+  background-color: #FFFFFF;
+  margin: -20rpx -20rpx 20rpx -20rpx;
+  padding: 20rpx;
+}
+
+.title {
+  font-size: 36rpx;
+  font-weight: 600;
+  color: #333;
+}
+
+.settings-icon {
+  width: 48rpx;
+  height: 48rpx;
+}
+
+/* 统计卡片区域 */
+.stats-section {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20rpx;
+  margin-bottom: 40rpx;
+}
+
+.stat-card {
+  background-color: #FFFFFF;
+  border-radius: 24rpx;
+  padding: 30rpx;
+  width: calc(50% - 10rpx);
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.06);
+}
+
+.stat-card.full-width {
+  width: 100%;
+}
+
+.stat-label {
+  display: block;
+  font-size: 28rpx;
+  color: #666;
+  margin-bottom: 16rpx;
+}
+
+.stat-value {
+  display: block;
+  font-size: 56rpx;
+  font-weight: 600;
+  color: #333;
+}
+
+/* 学科分类 */
+.section-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 24rpx;
+}
+
+.subjects-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20rpx;
+  margin-bottom: 40rpx;
+}
+
+.subject-card {
+  border-radius: 24rpx;
+  padding: 30rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: transform 0.3s;
+  min-height: 280rpx;
+}
+
+.subject-card:active {
+  transform: scale(0.98);
+}
+
+.subject-image {
+  width: 200rpx;
+  height: 200rpx;
+  margin-bottom: 20rpx;
+}
+
+.subject-info {
+  text-align: center;
+  width: 100%;
+}
+
+.subject-name {
+  display: block;
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 8rpx;
+}
+
+.quick-practice {
+  display: block;
+  font-size: 24rpx;
+  color: #999;
+}
+
+/* 学科掌握进度 */
+.progress-section {
+  margin-bottom: 40rpx;
+}
+
+.progress-item {
+  margin-bottom: 32rpx;
+}
+
+.progress-label {
+  display: block;
+  font-size: 28rpx;
+  color: #333;
+  margin-bottom: 12rpx;
+}
+
+.progress-bar-container {
+  width: 100%;
+  height: 16rpx;
+  background-color: #E5E5E5;
+  border-radius: 8rpx;
+  overflow: hidden;
+}
+
+.progress-bar {
+  height: 100%;
+  background-color: #333;
+  border-radius: 8rpx;
+  transition: width 0.3s;
+}

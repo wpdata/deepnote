@@ -1,0 +1,54 @@
+<view class="container">
+  <!-- 顶部栏 -->
+  <view class="header">
+    <text class="title">首页</text>
+    <image class="settings-icon" src="/images/settings.png" mode="aspectFit" bindtap="onSettings"></image>
+  </view>
+
+  <!-- 统计卡片区域 -->
+  <view class="stats-section">
+    <view class="stat-card">
+      <text class="stat-label">问题总数</text>
+      <text class="stat-value">{{stats.totalErrors}}</text>
+    </view>
+    <view class="stat-card">
+      <text class="stat-label">掌握的概念</text>
+      <text class="stat-value">{{stats.masteredCount}}</text>
+    </view>
+    <view class="stat-card full-width">
+      <text class="stat-label">需要改进</text>
+      <text class="stat-value">{{stats.needImprove}}</text>
+    </view>
+  </view>
+
+  <!-- 学科分类 -->
+  <view class="section-title">学科分类</view>
+  <view class="subjects-grid">
+    <view
+      class="subject-card"
+      wx:for="{{subjects}}"
+      wx:key="id"
+      style="background-color: {{item.bgColor}}"
+      bindtap="onSubjectTap"
+      data-id="{{item.id}}"
+      data-name="{{item.name}}"
+    >
+      <image class="subject-image" src="{{item.image}}" mode="aspectFit"></image>
+      <view class="subject-info">
+        <text class="subject-name">{{item.name}}</text>
+        <text class="quick-practice">快速练习</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 学科掌握进度 -->
+  <view class="section-title">数学掌握</view>
+  <view class="progress-section">
+    <view class="progress-item" wx:for="{{subjects}}" wx:key="id">
+      <text class="progress-label">{{item.name}}掌握</text>
+      <view class="progress-bar-container">
+        <view class="progress-bar" style="width: {{item.progress}}%"></view>
+      </view>
+    </view>
+  </view>
+</view>

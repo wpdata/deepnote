@@ -1,0 +1,78 @@
+<view class="container">
+  <view class="header">
+    <text class="title">拍题识别</text>
+  </view>
+
+  <!-- 未上传状态 -->
+  <view class="upload-section" wx:if="{{!imageUrl && !recognizing}}">
+    <view class="upload-area" bindtap="chooseImage">
+      <image class="upload-icon" src="/images/camera.png" mode="aspectFit"></image>
+      <text class="upload-text">点击拍照或选择图片</text>
+      <text class="upload-hint">支持 JPG、PNG 格式</text>
+    </view>
+
+    <view class="action-buttons">
+      <button class="action-btn primary" bindtap="takePhoto">
+        <image class="btn-icon" src="/images/camera.png" mode="aspectFit"></image>
+        拍照识别
+      </button>
+      <button class="action-btn secondary" bindtap="chooseFromAlbum">
+        <image class="btn-icon" src="/images/album.png" mode="aspectFit"></image>
+        从相册选择
+      </button>
+    </view>
+  </view>
+
+  <!-- 识别中状态 -->
+  <view class="recognizing-section" wx:if="{{recognizing}}">
+    <image class="preview-image" src="{{imageUrl}}" mode="aspectFit"></image>
+    <view class="progress-container">
+      <view class="progress-ring">
+        <view class="progress-value">{{progress}}%</view>
+      </view>
+      <text class="progress-text">正在识别中...</text>
+    </view>
+  </view>
+
+  <!-- 识别完成状态 -->
+  <view class="result-section" wx:if="{{recognized}}">
+    <image class="preview-image" src="{{imageUrl}}" mode="aspectFit"></image>
+
+    <view class="result-card">
+      <view class="result-header">
+        <text class="result-title">识别结果</text>
+        <button class="edit-btn" bindtap="editResult">编辑</button>
+      </view>
+
+      <view class="result-content">
+        <textarea
+          class="result-textarea"
+          value="{{recognizedText}}"
+          bindinput="onTextInput"
+          placeholder="识别的题目内容"
+          disabled="{{!editing}}"
+        ></textarea>
+      </view>
+
+      <view class="question-info">
+        <view class="info-item">
+          <text class="info-label">学科</text>
+          <picker bindchange="onSubjectChange" value="{{subjectIndex}}" range="{{subjects}}">
+            <view class="picker">
+              {{subjects[subjectIndex]}}
+            </view>
+          </picker>
+        </view>
+        <view class="info-item">
+          <text class="info-label">知识点</text>
+          <input class="info-input" value="{{knowledgePoint}}" bindinput="onKnowledgeInput" placeholder="请输入知识点" />
+        </view>
+      </view>
+
+      <view class="action-buttons">
+        <button class="action-btn secondary" bindtap="reRecognize">重新识别</button>
+        <button class="action-btn primary" bindtap="confirmAdd">确认添加到错题本</button>
+      </view>
+    </view>
+  </view>
+</view>
