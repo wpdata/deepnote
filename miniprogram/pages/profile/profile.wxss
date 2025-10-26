@@ -19,8 +19,12 @@
   width: 120rpx;
   height: 120rpx;
   border-radius: 60rpx;
-  border: 4rpx solid #FFFFFF;
+  background-color: rgba(255, 255, 255, 0.3);
   margin-right: 24rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 60rpx;
 }
 
 .user-info {
@@ -153,9 +157,9 @@
 }
 
 .menu-icon {
-  width: 48rpx;
-  height: 48rpx;
+  font-size: 48rpx;
   margin-right: 20rpx;
+  line-height: 1;
 }
 
 .menu-title {
@@ -164,9 +168,9 @@
 }
 
 .arrow-icon {
-  width: 32rpx;
-  height: 32rpx;
-  opacity: 0.4;
+  font-size: 40rpx;
+  color: #999;
+  line-height: 1;
 }
 
 /* 版本信息 */

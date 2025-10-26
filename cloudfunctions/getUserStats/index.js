@@ -14,7 +14,9 @@ const db = cloud.database()
  * @returns {Object} 用户统计数据
  */
 exports.main = async (event, context) => {
-  const openid = cloud.getWXContext().OPENID
+  // 获取openid，测试环境使用固定值
+  const wxContext = cloud.getWXContext()
+  const openid = wxContext.OPENID || 'test_user_openid'
 
   try {
     // 1. 获取用户基本统计

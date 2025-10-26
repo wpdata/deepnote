@@ -28,7 +28,9 @@ exports.main = async (event, context) => {
     difficulty = 'medium'
   } = event
 
-  const openid = cloud.getWXContext().OPENID
+  // 获取openid，测试环境使用固定值
+  const wxContext = cloud.getWXContext()
+  const openid = wxContext.OPENID || 'test_user_openid'
 
   // 参数验证
   if (!content || !subject || !knowledgePoint) {

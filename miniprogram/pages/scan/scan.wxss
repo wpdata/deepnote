@@ -37,8 +37,7 @@
 }
 
 .upload-icon {
-  width: 120rpx;
-  height: 120rpx;
+  font-size: 120rpx;
   margin-bottom: 30rpx;
   opacity: 0.6;
 }
@@ -85,9 +84,9 @@
 }
 
 .btn-icon {
-  width: 40rpx;
-  height: 40rpx;
+  font-size: 40rpx;
   margin-right: 12rpx;
+  line-height: 1;
 }
 
 /* 识别中 */

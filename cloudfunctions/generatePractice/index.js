@@ -24,7 +24,9 @@ exports.main = async (event, context) => {
     count = 5
   } = event
 
-  const openid = cloud.getWXContext().OPENID
+  // 获取openid，测试环境使用固定值
+  const wxContext = cloud.getWXContext()
+  const openid = wxContext.OPENID || 'test_user_openid'
 
   if (!knowledgePoint || !subject) {
     return {

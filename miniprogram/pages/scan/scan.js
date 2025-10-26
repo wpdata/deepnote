@@ -53,30 +53,67 @@ Page({
     })
   },
 
-  startRecognition() {
+  async startRecognition() {
     this.setData({
       recognizing: true,
       progress: 0
     })
 
-    // 模拟识别进度
+    // 模拟识别进度动画
     const timer = setInterval(() => {
-      if (this.data.progress >= 100) {
-        clearInterval(timer)
-        this.setData({
-          recognizing: false,
-          recognized: true,
-          recognizedText: '题目：已知函数 f(x) = x² + 2x - 3，求函数的零点。\n\n解析：\n令 f(x) = 0\nx² + 2x - 3 = 0\n(x + 3)(x - 1) = 0\n所以 x = -3 或 x = 1'
-        })
-      } else {
+      if (this.data.progress < 90) {
         this.setData({
           progress: this.data.progress + 10
         })
       }
     }, 200)
 
-    // TODO: 调用云函数进行真实的OCR识别
-    // this.callOCRFunction()
+    try {
+      // 1. 先上传图片到云存储
+      const uploadRes = await wx.cloud.uploadFile({
+        cloudPath: `ocr/${Date.now()}-${Math.random().toString(36).substr(2)}.jpg`,
+        filePath: this.data.imageUrl
+      })
+
+      console.log('图片上传成功', uploadRes.fileID)
+
+      // 2. 调用 OCR 云函数识别
+      const ocrRes = await wx.cloud.callFunction({
+        name: 'ocrRecognize',
+        data: {
+          fileID: uploadRes.fileID
+        }
+      })
+
+      clearInterval(timer)
+
+      console.log('OCR识别成功', ocrRes.result)
+
+      if (ocrRes.result.success) {
+        this.setData({
+          recognizing: false,
+          recognized: true,
+          progress: 100,
+          recognizedText: ocrRes.result.text,
+          uploadedFileID: uploadRes.fileID // 保存云存储ID，后续保存错题时使用
+        })
+      } else {
+        throw new Error(ocrRes.result.error || 'OCR识别失败')
+      }
+    } catch (error) {
+      clearInterval(timer)
+      console.error('OCR识别失败', error)
+
+      this.setData({
+        recognizing: false,
+        recognized: false
+      })
+
+      wx.showToast({
+        title: '识别失败，请重试',
+        icon: 'none'
+      })
+    }
   },
 
   callOCRFunction() {
@@ -148,7 +185,7 @@ Page({
     })
   },
 
-  confirmAdd() {
+  async confirmAdd() {
     if (!this.data.knowledgePoint) {
       wx.showToast({
         title: '请输入知识点',
@@ -158,41 +195,50 @@ Page({
     }
 
     wx.showLoading({
-      title: '添加中...'
+      title: '添加中...',
+      mask: true
     })
 
-    // TODO: 调用云函数保存到数据库
-    const db = wx.cloud.database()
-    db.collection('errors').add({
-      data: {
-        content: this.data.recognizedText,
-        subject: this.data.subjects[this.data.subjectIndex],
-        knowledgePoint: this.data.knowledgePoint,
-        imageUrl: this.data.imageUrl,
-        mastered: false,
-        createTime: new Date()
-      },
-      success: () => {
-        wx.hideLoading()
+    try {
+      // 调用 saveError 云函数保存错题
+      const res = await wx.cloud.callFunction({
+        name: 'saveError',
+        data: {
+          content: this.data.recognizedText,
+          subject: this.data.subjects[this.data.subjectIndex],
+          knowledgePoint: this.data.knowledgePoint,
+          imageUrl: this.data.uploadedFileID || '', // 使用云存储ID
+          difficulty: 'medium'
+        }
+      })
+
+      console.log('保存错题成功', res.result)
+
+      wx.hideLoading()
+
+      if (res.result.success) {
         wx.showToast({
           title: '添加成功',
           icon: 'success'
         })
 
+        // 1.5秒后跳转到错题本
         setTimeout(() => {
+          this.reRecognize() // 重置状态
           wx.switchTab({
             url: '/pages/errorbook/errorbook'
           })
         }, 1500)
-      },
-      fail: (err) => {
-        wx.hideLoading()
-        console.error('添加失败', err)
-        wx.showToast({
-          title: '添加失败，请重试',
-          icon: 'none'
-        })
+      } else {
+        throw new Error(res.result.message || '添加失败')
       }
-    })
+    } catch (error) {
+      wx.hideLoading()
+      console.error('添加错题失败', error)
+      wx.showToast({
+        title: error.message || '添加失败，请重试',
+        icon: 'none'
+      })
+    }
   }
 })

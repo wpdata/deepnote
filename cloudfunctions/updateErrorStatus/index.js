@@ -19,7 +19,9 @@ const _ = db.command
  */
 exports.main = async (event, context) => {
   const { errorId, mastered } = event
-  const openid = cloud.getWXContext().OPENID
+  // 获取openid，测试环境使用固定值
+  const wxContext = cloud.getWXContext()
+  const openid = wxContext.OPENID || 'test_user_openid'
 
   if (!errorId || typeof mastered !== 'boolean') {
     return {

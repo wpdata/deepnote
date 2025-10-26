@@ -6,18 +6,18 @@
   <!-- 未上传状态 -->
   <view class="upload-section" wx:if="{{!imageUrl && !recognizing}}">
     <view class="upload-area" bindtap="chooseImage">
-      <image class="upload-icon" src="/images/camera.png" mode="aspectFit"></image>
+      <text class="upload-icon">📷</text>
       <text class="upload-text">点击拍照或选择图片</text>
       <text class="upload-hint">支持 JPG、PNG 格式</text>
     </view>
 
     <view class="action-buttons">
       <button class="action-btn primary" bindtap="takePhoto">
-        <image class="btn-icon" src="/images/camera.png" mode="aspectFit"></image>
+        <text class="btn-icon">📷</text>
         拍照识别
       </button>
       <button class="action-btn secondary" bindtap="chooseFromAlbum">
-        <image class="btn-icon" src="/images/album.png" mode="aspectFit"></image>
+        <text class="btn-icon">🖼️</text>
         从相册选择
       </button>
     </view>

@@ -2,7 +2,7 @@
   <!-- 顶部栏 -->
   <view class="header">
     <text class="title">首页</text>
-    <image class="settings-icon" src="/images/settings.png" mode="aspectFit" bindtap="onSettings"></image>
+    <text class="settings-icon" bindtap="onSettings">⚙️</text>
   </view>
 
   <!-- 统计卡片区域 -->
@@ -15,7 +15,7 @@
       <text class="stat-label">掌握的概念</text>
       <text class="stat-value">{{stats.masteredCount}}</text>
     </view>
-    <view class="stat-card full-width">
+    <view class="stat-card">
       <text class="stat-label">需要改进</text>
       <text class="stat-value">{{stats.needImprove}}</text>
     </view>
@@ -33,7 +33,7 @@
       data-id="{{item.id}}"
       data-name="{{item.name}}"
     >
-      <image class="subject-image" src="{{item.image}}" mode="aspectFit"></image>
+      <text class="subject-icon">{{item.icon}}</text>
       <view class="subject-info">
         <text class="subject-name">{{item.name}}</text>
         <text class="quick-practice">快速练习</text>

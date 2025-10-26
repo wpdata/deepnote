@@ -18,6 +18,11 @@ Page({
     this.loadStats()
   },
 
+  onShow() {
+    // 每次显示页面时刷新统计数据
+    this.loadStats()
+  },
+
   loadUserInfo() {
     // 从本地存储或云端获取用户信息
     const userInfo = wx.getStorageSync('userInfo')
@@ -28,10 +33,32 @@ Page({
     }
   },
 
-  loadStats() {
-    // TODO: 从云数据库加载统计数据
-    const db = wx.cloud.database()
-    // 查询用户的错题统计
+  async loadStats() {
+    try {
+      // 调用 getUserStats 云函数获取统计数据
+      const res = await wx.cloud.callFunction({
+        name: 'getUserStats'
+      })
+
+      console.log('获取用户统计成功', res.result)
+
+      if (res.result.success) {
+        this.setData({
+          stats: {
+            totalErrors: res.result.stats.totalErrors,
+            masteredErrors: res.result.stats.masteredErrors,
+            practiceCount: res.result.stats.practiceCount,
+            masteredRate: res.result.stats.masteredRate
+          },
+          userInfo: {
+            ...this.data.userInfo,
+            studyDays: res.result.stats.studyDays
+          }
+        })
+      }
+    } catch (error) {
+      console.error('加载统计数据失败', error)
+    }
   },
 
   onBackupData() {
