@@ -18,57 +18,77 @@ Page({
   },
 
   onLoad(options) {
-    if (options.knowledgePoint) {
+    // 随机练习可以指定学科，但不指定知识点
+    if (options.subject) {
       this.setData({
-        knowledgePoint: options.knowledgePoint
+        subject: options.subject,
+        knowledgePoint: '随机练习' // 显示用
       })
     }
     this.loadQuestions()
   },
 
-  loadQuestions() {
-    // 模拟生成练习题
-    const mockQuestions = [
-      {
-        content: '下列函数中，在定义域内单调递增的是？',
-        options: [
-          'f(x) = -x² + 1',
-          'f(x) = x³',
-          'f(x) = -x',
-          'f(x) = 1/x'
-        ],
-        correctAnswer: 1,
-        explanation: 'f(x) = x³ 是奇函数，在整个定义域 R 上单调递增。其他选项都不满足在定义域内单调递增的条件。'
-      },
-      {
-        content: '函数 f(x) = 2x - 1 的零点是？',
-        options: [
-          'x = 0',
-          'x = 1/2',
-          'x = -1/2',
-          'x = 1'
-        ],
-        correctAnswer: 1,
-        explanation: '令 f(x) = 0，即 2x - 1 = 0，解得 x = 1/2。'
-      },
-      {
-        content: '若函数 f(x) 在区间 [a, b] 上连续，且 f(a)·f(b) < 0，则函数在区间 (a, b) 内？',
-        options: [
-          '一定有零点',
-          '可能有零点',
-          '一定没有零点',
-          '有且仅有一个零点'
-        ],
-        correctAnswer: 0,
-        explanation: '根据零点存在定理，如果函数在区间上连续，且区间端点函数值异号，则函数在该区间内一定有零点，但不一定只有一个。'
-      }
-    ]
+  async loadQuestions() {
+    try {
+      wx.showLoading({
+        title: '生成练习题...',
+        mask: true
+      })
 
-    this.setData({
-      questions: mockQuestions,
-      currentQuestion: mockQuestions[0],
-      answers: new Array(mockQuestions.length).fill(null)
-    })
+      // 随机从用户的未掌握错题中选择
+      const db = wx.cloud.database()
+      const errorsRes = await db.collection('errors')
+        .where({
+          mastered: false,
+          ...(this.data.subject ? { subject: this.data.subject } : {})
+        })
+        .limit(10)
+        .get()
+
+      console.log('查询未掌握错题', errorsRes.data)
+
+      if (errorsRes.data.length > 0) {
+        // 随机打乱并取前5个
+        const shuffled = errorsRes.data.sort(() => 0.5 - Math.random()).slice(0, 5)
+
+        // 调用 generatePractice 生成练习题（使用第一个错题的知识点）
+        const res = await wx.cloud.callFunction({
+          name: 'generatePractice',
+          data: {
+            subject: shuffled[0].subject,
+            knowledgePoint: shuffled[0].knowledgePoint,
+            count: 5
+          }
+        })
+
+        if (res.result.success && res.result.questions.length > 0) {
+          const questions = res.result.questions.map(q => ({
+            content: q.content,
+            options: q.options.map(opt => opt.text),
+            correctAnswer: q.correctAnswer,
+            explanation: q.explanation
+          }))
+
+          this.setData({
+            questions: questions,
+            currentQuestion: questions[0],
+            answers: new Array(questions.length).fill(null)
+          })
+        }
+      } else {
+        // 如果没有未掌握的错题，使用默认题目
+        throw new Error('暂无未掌握的错题')
+      }
+
+      wx.hideLoading()
+    } catch (error) {
+      console.error('加载练习题失败', error)
+      wx.hideLoading()
+      wx.showToast({
+        title: error.message || '加载失败',
+        icon: 'none'
+      })
+    }
   },
 
   selectOption(e) {

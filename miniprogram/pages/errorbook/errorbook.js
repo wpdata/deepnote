@@ -56,54 +56,109 @@ Page({
     this.loadKnowledgeList()
   },
 
-  loadKnowledgeList() {
-    // 所有学科的模拟数据
-    const allMockData = [
-      // 数学
-      { id: '1', name: '函数与方程', errorCount: 15, masteredRate: 60, subject: 'math' },
-      { id: '2', name: '三角函数', errorCount: 8, masteredRate: 75, subject: 'math' },
-      { id: '3', name: '立体几何', errorCount: 12, masteredRate: 40, subject: 'math' },
-      { id: '4', name: '概率统计', errorCount: 6, masteredRate: 85, subject: 'math' },
-      // 文学
-      { id: '5', name: '古诗词鉴赏', errorCount: 10, masteredRate: 70, subject: 'literature' },
-      { id: '6', name: '文言文阅读', errorCount: 12, masteredRate: 55, subject: 'literature' },
-      { id: '7', name: '现代文阅读', errorCount: 8, masteredRate: 80, subject: 'literature' },
-      { id: '8', name: '作文写作', errorCount: 5, masteredRate: 65, subject: 'literature' },
-      // 英语
-      { id: '9', name: '语法结构', errorCount: 18, masteredRate: 50, subject: 'english' },
-      { id: '10', name: '词汇运用', errorCount: 14, masteredRate: 60, subject: 'english' },
-      { id: '11', name: '阅读理解', errorCount: 9, masteredRate: 75, subject: 'english' },
-      { id: '12', name: '写作表达', errorCount: 7, masteredRate: 70, subject: 'english' },
-      // 物理
-      { id: '13', name: '力学', errorCount: 16, masteredRate: 45, subject: 'physics' },
-      { id: '14', name: '电学', errorCount: 13, masteredRate: 55, subject: 'physics' },
-      { id: '15', name: '光学', errorCount: 8, masteredRate: 70, subject: 'physics' },
-      { id: '16', name: '热学', errorCount: 6, masteredRate: 80, subject: 'physics' },
-      // 化学
-      { id: '17', name: '化学反应', errorCount: 11, masteredRate: 65, subject: 'chemistry' },
-      { id: '18', name: '元素周期表', errorCount: 9, masteredRate: 75, subject: 'chemistry' },
-      { id: '19', name: '有机化学', errorCount: 14, masteredRate: 50, subject: 'chemistry' },
-      { id: '20', name: '化学实验', errorCount: 7, masteredRate: 80, subject: 'chemistry' },
-      // 生物
-      { id: '21', name: '细胞结构', errorCount: 10, masteredRate: 70, subject: 'biology' },
-      { id: '22', name: '遗传与进化', errorCount: 12, masteredRate: 60, subject: 'biology' },
-      { id: '23', name: '生态系统', errorCount: 8, masteredRate: 75, subject: 'biology' },
-      { id: '24', name: '生物实验', errorCount: 6, masteredRate: 85, subject: 'biology' }
-    ]
+  async loadKnowledgeList() {
+    try {
+      wx.showLoading({
+        title: '加载中...',
+        mask: true
+      })
 
-    // 根据当前选中的学科筛选数据
-    const filteredData = allMockData.filter(item => item.subject === this.data.currentSubject)
+      // 从云数据库查询当前学科的错题
+      const db = wx.cloud.database()
+      const _ = db.command
 
-    this.setData({
-      knowledgeList: filteredData,
-      allKnowledgeList: allMockData
-    })
+      // 将前端的学科ID转换为中文学科名
+      const subjectMap = {
+        'math': '数学',
+        'literature': '文学',
+        'english': '英语',
+        'physics': '物理',
+        'chemistry': '化学',
+        'biology': '生物'
+      }
+      const subjectName = subjectMap[this.data.currentSubject]
+
+      // 查询该学科下的所有错题
+      const errorsRes = await db.collection('errors')
+        .where({
+          subject: subjectName
+        })
+        .get()
+
+      console.log('查询错题成功', errorsRes.data)
+
+      // 按知识点汇总统计
+      const knowledgeMap = {}
+      errorsRes.data.forEach(error => {
+        const kp = error.knowledgePoint
+        if (!knowledgeMap[kp]) {
+          knowledgeMap[kp] = {
+            name: kp,
+            subject: this.data.currentSubject,
+            errorCount: 0,
+            masteredCount: 0,
+            errors: []
+          }
+        }
+        knowledgeMap[kp].errorCount++
+        if (error.mastered) {
+          knowledgeMap[kp].masteredCount++
+        }
+        knowledgeMap[kp].errors.push(error)
+      })
+
+      // 计算掌握率
+      const knowledgeList = Object.values(knowledgeMap).map(item => ({
+        id: item.name,
+        name: item.name,
+        errorCount: item.errorCount,
+        masteredRate: item.errorCount > 0
+          ? Math.round((item.masteredCount / item.errorCount) * 100)
+          : 0,
+        subject: item.subject,
+        errors: item.errors
+      }))
+
+      console.log('知识点统计', knowledgeList)
+
+      this.setData({
+        knowledgeList: knowledgeList
+      })
+
+      wx.hideLoading()
+    } catch (error) {
+      console.error('加载知识点列表失败', error)
+      wx.hideLoading()
+      wx.showToast({
+        title: '加载失败',
+        icon: 'none'
+      })
+    }
   },
 
   goToDetail(e) {
-    const id = e.currentTarget.dataset.id
-    wx.navigateTo({
-      url: `/pages/error-detail/error-detail?knowledgeId=${id}`
-    })
+    const { id, name } = e.currentTarget.dataset
+    // 找到对应的知识点数据
+    const knowledge = this.data.knowledgeList.find(item => item.id === id)
+
+    if (knowledge && knowledge.errors && knowledge.errors.length > 0) {
+      // 如果只有一个错题，直接跳转到错题详情
+      if (knowledge.errors.length === 1) {
+        wx.navigateTo({
+          url: `/pages/error-detail/error-detail?errorId=${knowledge.errors[0]._id}`
+        })
+      } else {
+        // 如果有多个错题，跳转到错题列表（暂时跳转到第一个）
+        // TODO: 创建错题列表页面
+        wx.navigateTo({
+          url: `/pages/error-detail/error-detail?errorId=${knowledge.errors[0]._id}`
+        })
+      }
+    } else {
+      wx.showToast({
+        title: '该知识点暂无错题',
+        icon: 'none'
+      })
+    }
   }
 })

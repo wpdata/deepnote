@@ -23,52 +23,61 @@ Page({
         knowledgePoint: options.knowledgePoint
       })
     }
+    if (options.subject) {
+      this.setData({
+        subject: options.subject
+      })
+    }
     this.loadQuestions()
   },
 
-  loadQuestions() {
-    // 模拟生成练习题
-    const mockQuestions = [
-      {
-        content: '下列函数中，在定义域内单调递增的是？',
-        options: [
-          'f(x) = -x² + 1',
-          'f(x) = x³',
-          'f(x) = -x',
-          'f(x) = 1/x'
-        ],
-        correctAnswer: 1,
-        explanation: 'f(x) = x³ 是奇函数，在整个定义域 R 上单调递增。其他选项都不满足在定义域内单调递增的条件。'
-      },
-      {
-        content: '函数 f(x) = 2x - 1 的零点是？',
-        options: [
-          'x = 0',
-          'x = 1/2',
-          'x = -1/2',
-          'x = 1'
-        ],
-        correctAnswer: 1,
-        explanation: '令 f(x) = 0，即 2x - 1 = 0，解得 x = 1/2。'
-      },
-      {
-        content: '若函数 f(x) 在区间 [a, b] 上连续，且 f(a)·f(b) < 0，则函数在区间 (a, b) 内？',
-        options: [
-          '一定有零点',
-          '可能有零点',
-          '一定没有零点',
-          '有且仅有一个零点'
-        ],
-        correctAnswer: 0,
-        explanation: '根据零点存在定理，如果函数在区间上连续，且区间端点函数值异号，则函数在该区间内一定有零点，但不一定只有一个。'
-      }
-    ]
+  async loadQuestions() {
+    try {
+      wx.showLoading({
+        title: '生成练习题...',
+        mask: true
+      })
 
-    this.setData({
-      questions: mockQuestions,
-      currentQuestion: mockQuestions[0],
-      answers: new Array(mockQuestions.length).fill(null)
-    })
+      // 调用 generatePractice 云函数生成练习题
+      const res = await wx.cloud.callFunction({
+        name: 'generatePractice',
+        data: {
+          subject: this.data.subject || '数学',
+          knowledgePoint: this.data.knowledgePoint,
+          count: 5
+        }
+      })
+
+      console.log('生成练习题成功', res.result)
+
+      if (res.result.success && res.result.questions.length > 0) {
+        // 转换题目格式
+        const questions = res.result.questions.map(q => ({
+          content: q.content,
+          options: q.options.map(opt => opt.text),
+          correctAnswer: q.correctAnswer,
+          explanation: q.explanation,
+          source: q.source
+        }))
+
+        this.setData({
+          questions: questions,
+          currentQuestion: questions[0],
+          answers: new Array(questions.length).fill(null)
+        })
+
+        wx.hideLoading()
+      } else {
+        throw new Error('暂无练习题')
+      }
+    } catch (error) {
+      console.error('加载练习题失败', error)
+      wx.hideLoading()
+      wx.showToast({
+        title: error.message || '加载失败',
+        icon: 'none'
+      })
+    }
   },
 
   selectOption(e) {

@@ -24,52 +24,107 @@ Page({
   },
 
   onLoad(options) {
-    if (options.knowledgeId) {
+    if (options.errorId) {
       this.setData({
-        questionId: options.knowledgeId
+        questionId: options.errorId
       })
       this.loadQuestionDetail()
     }
   },
 
-  loadQuestionDetail() {
-    // TODO: 从数据库加载题目详情
-    const db = wx.cloud.database()
-    // db.collection('errors').doc(this.data.questionId).get({...})
+  async loadQuestionDetail() {
+    try {
+      wx.showLoading({
+        title: '加载中...',
+        mask: true
+      })
+
+      // 调用 getErrorDetail 云函数获取错题详情
+      const res = await wx.cloud.callFunction({
+        name: 'getErrorDetail',
+        data: {
+          errorId: this.data.questionId
+        }
+      })
+
+      console.log('获取错题详情成功', res.result)
+
+      if (res.result.success) {
+        const error = res.result.error
+
+        this.setData({
+          question: {
+            subject: error.subject,
+            knowledgePoint: error.knowledgePoint,
+            content: error.content,
+            imageUrl: error.imageUrl || '',
+            mastered: error.mastered
+          },
+          analysis: error.aiAnalysis || this.data.analysis,
+          relatedKnowledge: error.relatedKnowledge || this.data.relatedKnowledge
+        })
+      } else {
+        throw new Error(res.result.error || '获取错题详情失败')
+      }
+
+      wx.hideLoading()
+    } catch (error) {
+      console.error('加载错题详情失败', error)
+      wx.hideLoading()
+      wx.showToast({
+        title: '加载失败',
+        icon: 'none'
+      })
+    }
   },
 
   startPractice() {
     wx.navigateTo({
-      url: `/pages/practice/practice?knowledgePoint=${this.data.question.knowledgePoint}`
+      url: `/pages/practice/practice?subject=${this.data.question.subject}&knowledgePoint=${this.data.question.knowledgePoint}`
     })
   },
 
-  toggleMastered() {
+  async toggleMastered() {
     const newStatus = !this.data.question.mastered
 
-    wx.showLoading({
-      title: newStatus ? '标记中...' : '取消中...'
-    })
-
-    // TODO: 更新数据库中的掌握状态
-    const db = wx.cloud.database()
-    // db.collection('errors').doc(this.data.questionId).update({
-    //   data: { mastered: newStatus }
-    // })
-
-    setTimeout(() => {
-      wx.hideLoading()
-      this.setData({
-        'question.mastered': newStatus
+    try {
+      wx.showLoading({
+        title: newStatus ? '标记中...' : '取消中...',
+        mask: true
       })
 
-      if (newStatus) {
+      // 调用 updateErrorStatus 云函数更新掌握状态
+      const res = await wx.cloud.callFunction({
+        name: 'updateErrorStatus',
+        data: {
+          errorId: this.data.questionId,
+          mastered: newStatus
+        }
+      })
+
+      console.log('更新掌握状态成功', res.result)
+
+      if (res.result.success) {
+        this.setData({
+          'question.mastered': newStatus
+        })
+
+        wx.hideLoading()
         wx.showToast({
-          title: '已标记为掌握',
+          title: newStatus ? '已标记为掌握' : '已取消掌握',
           icon: 'success'
         })
+      } else {
+        throw new Error(res.result.error || '更新失败')
       }
-    }, 500)
+    } catch (error) {
+      console.error('更新掌握状态失败', error)
+      wx.hideLoading()
+      wx.showToast({
+        title: '操作失败',
+        icon: 'none'
+      })
+    }
   },
 
   onShareAppMessage() {
