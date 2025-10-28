@@ -4,14 +4,22 @@ Page({
     question: {
       subject: '数学',
       knowledgePoint: '函数与方程',
+      difficulty: 'medium',
+      questionType: '解答题',
       content: '题目：已知函数 f(x) = x² + 2x - 3，求函数的零点。\n\n解析：\n令 f(x) = 0\nx² + 2x - 3 = 0\n(x + 3)(x - 1) = 0\n所以 x = -3 或 x = 1',
       imageUrl: '',
       mastered: false,
       userAnswer: '',
       correctAnswer: '',
-      isCorrect: null
+      isCorrect: null,
+      practiceCount: 0,
+      correctCount: 0,
+      wrongCount: 0
     },
-    // 新格式：使用 DeepSeek 生成的单段分析文本
+    // 支持两种格式：
+    // 1. aiAnalysis: 结构化对象（旧格式，包含 solution, errorReason, explanation, warningTip）
+    // 2. aiAnalysisText: 简单文本（新格式）
+    aiAnalysis: null,
     aiAnalysisText: '',
     relatedKnowledge: []
   },
@@ -50,28 +58,75 @@ Page({
         console.log('====== 错题数据字段 ======')
         console.log('subject:', error.subject)
         console.log('knowledgePoint:', error.knowledgePoint)
+        console.log('difficulty:', error.difficulty)
+        console.log('questionType:', error.questionType)
+        console.log('practiceCount:', error.practiceCount)
+        console.log('correctCount:', error.correctCount)
+        console.log('wrongCount:', error.wrongCount)
         console.log('content长度:', error.content?.length)
         console.log('imageUrl:', error.imageUrl)
         console.log('userAnswer:', error.userAnswer)
         console.log('correctAnswer:', error.correctAnswer)
         console.log('isCorrect:', error.isCorrect)
+        console.log('aiAnalysis类型:', typeof error.aiAnalysis)
+        console.log('aiAnalysis值:', error.aiAnalysis)
         console.log('aiAnalysisText:', error.aiAnalysisText)
         console.log('relatedKnowledge:', error.relatedKnowledge)
         console.log('========================')
+
+        // 判断 aiAnalysis 是对象还是字符串
+        let aiAnalysisObj = null
+        let aiAnalysisTextStr = ''
+
+        if (error.aiAnalysis) {
+          if (typeof error.aiAnalysis === 'object') {
+            // 旧格式：结构化对象
+            aiAnalysisObj = error.aiAnalysis
+          } else if (typeof error.aiAnalysis === 'string') {
+            // 新格式：简单文本（DeepSeek生成的真实AI分析）
+            aiAnalysisTextStr = error.aiAnalysis
+          }
+        }
+
+        // 如果云函数返回了 aiAnalysisText，优先使用
+        if (error.aiAnalysisText) {
+          aiAnalysisTextStr = error.aiAnalysisText
+        }
+
+        // 标准化难易程度字段（支持中英文）
+        let normalizedDifficulty = 'medium'
+        if (error.difficulty) {
+          const difficultyMap = {
+            '简单': 'easy',
+            '中等': 'medium',
+            '困难': 'hard',
+            'easy': 'easy',
+            'medium': 'medium',
+            'hard': 'hard'
+          }
+          normalizedDifficulty = difficultyMap[error.difficulty] || 'medium'
+        }
 
         this.setData({
           question: {
             subject: error.subject,
             knowledgePoint: error.knowledgePoint,
+            difficulty: normalizedDifficulty,
+            difficultyText: error.difficulty || '中等', // 保留原始文本用于显示
+            questionType: error.questionType || '',
             content: error.content,
             imageUrl: error.imageUrl || '',
             mastered: error.mastered,
             userAnswer: error.userAnswer || '',
             correctAnswer: error.correctAnswer || '',
-            isCorrect: error.isCorrect
+            isCorrect: error.isCorrect,
+            practiceCount: error.practiceCount || 0,
+            correctCount: error.correctCount || 0,
+            wrongCount: error.wrongCount || 0
           },
-          // 使用云函数返回的 aiAnalysisText
-          aiAnalysisText: error.aiAnalysisText || '暂无AI分析',
+          // 支持两种AI分析格式
+          aiAnalysis: aiAnalysisObj,
+          aiAnalysisText: aiAnalysisTextStr || '暂无AI分析',
           relatedKnowledge: error.relatedKnowledge || []
         })
 

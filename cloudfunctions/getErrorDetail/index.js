@@ -67,22 +67,28 @@ exports.main = async (event, context) => {
     // 新数据：aiAnalysis 是 DeepSeek 生成的字符串文本 (50-80字专业分析)
     // 旧数据：aiAnalysis 是对象 (包含 errorReason, explanation, solution, warningTip)
     let aiAnalysisText = ''
+    let aiAnalysisObj = null
 
     if (error.aiAnalysis) {
       if (typeof error.aiAnalysis === 'string') {
         // 新格式：直接使用 DeepSeek 生成的分析文本
         aiAnalysisText = error.aiAnalysis
       } else if (typeof error.aiAnalysis === 'object') {
-        // 旧格式：从对象中提取关键信息组合成文本
+        // 旧格式：保留完整的对象结构，供前端展示详细内容
+        aiAnalysisObj = error.aiAnalysis
+
+        // 同时生成简化的文本版本（用于不支持结构化显示的地方）
         const parts = []
-        if (error.aiAnalysis.errorReason) parts.push(error.aiAnalysis.errorReason)
-        if (error.aiAnalysis.explanation) parts.push(error.aiAnalysis.explanation)
+        if (error.aiAnalysis.errorReason) parts.push(`错误原因：${error.aiAnalysis.errorReason}`)
+        if (error.aiAnalysis.explanation) parts.push(`知识点讲解：${error.aiAnalysis.explanation}`)
+        if (error.aiAnalysis.solution) parts.push(`解题思路：${error.aiAnalysis.solution}`)
+        if (error.aiAnalysis.warningTip) parts.push(`易错提示：${error.aiAnalysis.warningTip}`)
         aiAnalysisText = parts.join('\n\n')
       }
     }
 
     // 如果没有AI分析文本，生成一个简单的提示
-    if (!aiAnalysisText) {
+    if (!aiAnalysisText && !aiAnalysisObj) {
       aiAnalysisText = `这道${error.subject}题考查${error.knowledgePoint}知识点。建议重点复习相关概念和解题方法，多做类似练习加强理解。`
     }
 
@@ -91,18 +97,32 @@ exports.main = async (event, context) => {
       success: true,
       error: {
         ...error,
-        // 统一使用 aiAnalysisText 字段返回给前端
+        // 兼容两种格式：
+        // 1. aiAnalysis: 原始数据（可能是对象或字符串）
+        // 2. aiAnalysisText: 文本版本（用于简单显示）
+        aiAnalysis: aiAnalysisObj || error.aiAnalysis,
         aiAnalysisText: aiAnalysisText,
+        // 确保返回所有关键字段
+        difficulty: error.difficulty || 'medium',
+        questionType: error.questionType || '',
+        practiceCount: error.practiceCount || 0,
+        correctCount: error.correctCount || 0,
+        wrongCount: error.wrongCount || 0,
         // 如果没有相关知识点，生成推荐
         relatedKnowledge: error.relatedKnowledge || generateRelatedKnowledge(error.knowledgePoint)
       }
     }
 
     console.log('====== getErrorDetail 返回数据 ======')
+    console.log('difficulty:', result.error.difficulty)
+    console.log('questionType:', result.error.questionType)
+    console.log('practiceCount:', result.error.practiceCount)
+    console.log('aiAnalysis类型:', typeof result.error.aiAnalysis)
     console.log('aiAnalysisText:', result.error.aiAnalysisText)
     console.log('userAnswer:', result.error.userAnswer)
     console.log('correctAnswer:', result.error.correctAnswer)
     console.log('isCorrect:', result.error.isCorrect)
+    console.log('imageUrl:', result.error.imageUrl)
     console.log('relatedKnowledge:', result.error.relatedKnowledge)
     console.log('====================================')
 

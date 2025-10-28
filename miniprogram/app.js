@@ -16,32 +16,92 @@ App({
       });
       console.log('云开发初始化成功');
       this.globalData.cloudReady = true;
+
+      // 自动微信登录
+      this.wxLogin();
     } catch (error) {
       console.error('云开发初始化失败:', error);
       this.globalData.cloudReady = false;
     }
+  },
 
-    // 获取用户信息
-    wx.getSetting({
-      success: res => {
-        if (res.authSetting['scope.userInfo']) {
-          // 已经授权，可以直接调用 getUserInfo 获取头像昵称
-          wx.getUserInfo({
-            success: res => {
-              this.globalData.userInfo = res.userInfo;
-              // 由于 getUserInfo 是网络请求，可能会在 Page.onLoad 之后才返回
-              // 所以此处加入 callback 以防止这种情况
-              if (this.userInfoReadyCallback) {
-                this.userInfoReadyCallback(res);
-              }
+  // 微信登录
+  wxLogin: function() {
+    const userId = wx.getStorageSync('userId');
+
+    // 如果已有 userId，直接使用
+    if (userId) {
+      console.log('使用缓存的 userId:', userId);
+      this.globalData.userId = userId;
+      return Promise.resolve(userId);
+    }
+
+    // 静默登录
+    return new Promise((resolve, reject) => {
+      wx.showLoading({
+        title: '登录中...',
+      });
+
+      wx.cloud.callFunction({
+        name: 'wxLogin',
+        data: {},
+        success: res => {
+          wx.hideLoading();
+          console.log('微信登录成功:', res);
+
+          if (res.result.success) {
+            const { userId, isNewUser } = res.result.data;
+
+            // 保存 userId 到本地
+            wx.setStorageSync('userId', userId);
+            this.globalData.userId = userId;
+
+            if (isNewUser) {
+              wx.showToast({
+                title: '欢迎使用！',
+                icon: 'success'
+              });
             }
+
+            resolve(userId);
+          } else {
+            wx.showToast({
+              title: '登录失败',
+              icon: 'none'
+            });
+            reject(res.result.error);
+          }
+        },
+        fail: err => {
+          wx.hideLoading();
+          console.error('微信登录失败:', err);
+          wx.showToast({
+            title: '登录失败',
+            icon: 'none'
           });
+          reject(err);
         }
-      }
+      });
     });
   },
-  
+
+  // 获取 userId
+  getUserId: function() {
+    return this.globalData.userId || wx.getStorageSync('userId');
+  },
+
+  // 退出登录
+  logout: function() {
+    wx.removeStorageSync('userId');
+    this.globalData.userId = null;
+    wx.showToast({
+      title: '已退出登录',
+      icon: 'success'
+    });
+  },
+
   globalData: {
-    cloudReady: false
+    cloudReady: false,
+    userId: null
   }
 }); 

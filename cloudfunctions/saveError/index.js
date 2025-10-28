@@ -35,9 +35,23 @@ exports.main = async (event, context) => {
     errorId = null          // 更新时需要提供errorId
   } = event
 
-  // 获取openid，测试环境使用固定值
+  // 获取用户身份信息
   const wxContext = cloud.getWXContext()
   const openid = wxContext.OPENID || 'test_user_openid'
+
+  // 获取 userId（从数据库查询）
+  let userId = null
+  try {
+    const userQuery = await db.collection('users').where({
+      openId: openid
+    }).get()
+
+    if (userQuery.data.length > 0) {
+      userId = userQuery.data[0]._id
+    }
+  } catch (error) {
+    console.error('获取userId失败:', error)
+  }
 
   // 参数验证
   if (!content || !subject || !knowledgePoint) {
@@ -81,6 +95,7 @@ exports.main = async (event, context) => {
     const errorResult = await db.collection('errors').add({
       data: {
         _openid: openid,
+        userId: userId,    // 新增 userId 字段
         subject,
         knowledgePoint,
         difficulty,

@@ -1,0 +1,11 @@
+{
+  "name": "deepnote",
+  "version": "0.3.0",
+  "description": "智能错题本 - DeepNote",
+  "scripts": {
+    "register-admin": "node scripts/register-admin.js"
+  },
+  "dependencies": {
+    "@cloudbase/node-sdk": "^2.6.3"
+  }
+}

@@ -23,6 +23,7 @@
 
 .subject-tag,
 .knowledge-tag,
+.difficulty-tag,
 .mastered-status {
   padding: 8rpx 20rpx;
   border-radius: 20rpx;
@@ -39,6 +40,25 @@
   color: #FA8C16;
 }
 
+.difficulty-tag {
+  font-weight: 500;
+}
+
+.difficulty-easy {
+  background-color: #F6FFED;
+  color: #52C41A;
+}
+
+.difficulty-medium {
+  background-color: #FFF7E6;
+  color: #FA8C16;
+}
+
+.difficulty-hard {
+  background-color: #FFF1F0;
+  color: #FF4D4F;
+}
+
 .mastered-status {
   background-color: #F0F0F0;
   color: #999;
@@ -47,6 +67,27 @@
 .mastered-status.mastered {
   background-color: #F6FFED;
   color: #52C41A;
+}
+
+/* 题型和练习统计 */
+.question-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16rpx;
+  margin-bottom: 24rpx;
+  padding: 16rpx;
+  background-color: #F9F9F9;
+  border-radius: 12rpx;
+}
+
+.meta-item {
+  font-size: 24rpx;
+  color: #666;
+}
+
+.success-text {
+  color: #52C41A;
+  font-weight: 500;
 }
 
 .question-content {

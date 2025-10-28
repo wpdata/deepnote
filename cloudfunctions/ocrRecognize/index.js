@@ -1133,29 +1133,35 @@ async function analyzeMathQuestion(rawText, formattedText, userAnswer) {
     const calculatedAnswer = boxedMatch ? boxedMatch[1].trim() : ''
     console.log('提取的答案:', calculatedAnswer)
 
-    // 第二步：使用DeepSeek将通义千问的解题过程转化为学生易懂的分析
+    // 第二步：使用DeepSeek格式化解题过程并提取元数据
     const analysisCompletion = await deepseek.chat.completions.create({
       model: 'deepseek-chat',
       messages: [
         {
           role: 'system',
-          content: '你是数学学习助手。将专业的数学解题过程转化为学生易懂的个性化分析。必须返回纯JSON。'
+          content: '你是数学学习助手。负责格式化解题过程并提取元数据。必须返回纯JSON。'
         },
         {
           role: 'user',
           content: `题目: ${formattedText || rawText}
 ${userAnswer ? `学生答案: ${userAnswer}` : ''}
 
-通义千问的解题过程:
+通义千问-Math-Turbo的完整解题过程:
 ${mathResponse}
 
-请基于上述解题过程，生成学生版的分析。返回JSON格式:
+请完成以下任务并返回JSON:
 {
   "knowledgePoint": "知识点名称",
   "difficulty": "简单/中等/困难",
   "questionType": "应用题/计算题/填空题等",
-  "aiAnalysis": "50-80字学生版分析。要求：1)说明考查的核心概念 2)用通俗语言概括解题思路 3)如果有学生答案，分析错误原因 4)给出学习建议。不要包含LaTeX公式，用文字描述数学表达式。"
-}`
+  "formattedSteps": "格式化的解题步骤（保留完整内容，将LaTeX公式转为易读文本，保持步骤清晰）",
+  "summary": "30-50字总结：考查的核心概念、关键解题思路${userAnswer ? '、学生错误原因分析' : ''}"
+}
+
+注意：
+1. formattedSteps必须保留Math-Turbo的完整解题过程，只做格式美化
+2. 将LaTeX公式如\\frac{a}{b}转为"a/b"，\\boxed{}去掉只保留内容
+3. summary只是简短补充说明，不要替代解题步骤`
         }
       ],
       response_format: { type: 'json_object' },
@@ -1163,17 +1169,20 @@ ${mathResponse}
     })
 
     const analysisText = analysisCompletion.choices[0].message.content.trim()
-    console.log('DeepSeek转化后的分析:', analysisText)
+    console.log('DeepSeek格式化结果:', analysisText)
 
     const analysis = JSON.parse(analysisText)
+
+    // 组合完整的AI分析：格式化的解题步骤 + 简短总结
+    const fullAnalysis = `【解题步骤】\n${analysis.formattedSteps || mathResponse}\n\n【知识点分析】\n${analysis.summary || ''}`
 
     const result = {
       correctAnswer: calculatedAnswer,
       knowledgePoint: analysis.knowledgePoint || '待标注',
       difficulty: analysis.difficulty || '中等',
       questionType: analysis.questionType || '应用题',
-      aiAnalysis: analysis.aiAnalysis || '',
-      mathSteps: mathResponse  // 保存完整的数学解题过程（可选）
+      aiAnalysis: fullAnalysis,
+      mathSteps: mathResponse  // 保存原始的数学解题过程（备用）
     }
 
     console.log('✅ 数学题分析完成 - 通义千问计算 + DeepSeek分析')

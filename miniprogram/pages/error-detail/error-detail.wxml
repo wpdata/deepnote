@@ -4,9 +4,21 @@
     <view class="question-header">
       <view class="subject-tag">{{question.subject}}</view>
       <view class="knowledge-tag">{{question.knowledgePoint}}</view>
+      <view class="difficulty-tag difficulty-{{question.difficulty}}">
+        {{question.difficulty === 'easy' ? '简单' : question.difficulty === 'hard' ? '困难' : '中等'}}
+      </view>
       <view class="mastered-status {{question.mastered ? 'mastered' : ''}}">
         {{question.mastered ? '已掌握' : '待掌握'}}
       </view>
+    </view>
+
+    <!-- 题型和练习统计 -->
+    <view wx:if="{{question.questionType || question.practiceCount > 0}}" class="question-meta">
+      <text wx:if="{{question.questionType}}" class="meta-item">📝 {{question.questionType}}</text>
+      <text wx:if="{{question.practiceCount > 0}}" class="meta-item">
+        🎯 练习 {{question.practiceCount}} 次
+        <text wx:if="{{question.correctCount > 0}}" class="success-text"> (答对{{question.correctCount}}次)</text>
+      </text>
     </view>
 
     <view class="question-content">
@@ -43,11 +55,11 @@
   <view class="analysis-card">
     <view class="card-title">
       <image class="ai-icon" src="/images/ai.png" mode="aspectFit"></image>
-      <text>AI 智能分析</text>
+      <text>AI 智能分析 (DeepSeek)</text>
     </view>
 
     <view class="analysis-section">
-      <text class="section-content">{{aiAnalysisText}}</text>
+      <text class="section-content">{{aiAnalysisText || '暂无AI分析'}}</text>
     </view>
   </view>
 

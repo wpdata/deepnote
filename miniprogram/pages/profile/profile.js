@@ -10,7 +10,9 @@ Page({
       masteredErrors: 85,
       practiceCount: 45,
       masteredRate: 71
-    }
+    },
+    isEditingNickname: false,
+    tempNickname: ''
   },
 
   onLoad() {
@@ -21,15 +23,163 @@ Page({
   onShow() {
     // 每次显示页面时刷新统计数据
     this.loadStats()
+    this.loadUserInfo()
   },
 
-  loadUserInfo() {
-    // 从本地存储或云端获取用户信息
-    const userInfo = wx.getStorageSync('userInfo')
-    if (userInfo) {
-      this.setData({
-        userInfo
+  async loadUserInfo() {
+    try {
+      // 调用云函数获取用户信息
+      const res = await wx.cloud.callFunction({
+        name: 'getUserInfo'
+      });
+
+      console.log('获取用户信息成功', res);
+
+      if (res.result.success) {
+        const userInfo = {
+          avatarUrl: res.result.data.avatarUrl || '',
+          nickName: res.result.data.nickName || '智能错题本用户',
+          studyDays: this.data.userInfo.studyDays
+        };
+
+        this.setData({ userInfo });
+
+        // 同时保存到本地缓存
+        wx.setStorageSync('userInfo', userInfo);
+      } else {
+        console.error('获取用户信息失败:', res.result.error);
+      }
+    } catch (error) {
+      console.error('加载用户信息失败', error);
+
+      // 降级处理：从本地缓存读取
+      const cachedUserInfo = wx.getStorageSync('userInfo');
+      if (cachedUserInfo) {
+        this.setData({
+          userInfo: {
+            ...this.data.userInfo,
+            ...cachedUserInfo
+          }
+        });
+      }
+    }
+  },
+
+  // 选择头像
+  async onChooseAvatar(e) {
+    const { avatarUrl } = e.detail
+    console.log('选择头像:', avatarUrl)
+
+    try {
+      wx.showLoading({ title: '上传中...' })
+
+      // 上传头像到云存储
+      const cloudPath = `avatars/${Date.now()}-${Math.random().toString(36).slice(2)}.jpg`
+      const uploadRes = await wx.cloud.uploadFile({
+        cloudPath,
+        filePath: avatarUrl
       })
+
+      console.log('头像上传成功:', uploadRes.fileID)
+
+      // 更新用户信息
+      await this.updateUserInfo({
+        avatarUrl: uploadRes.fileID
+      })
+
+      wx.hideLoading()
+      wx.showToast({
+        title: '头像更新成功',
+        icon: 'success'
+      })
+    } catch (error) {
+      wx.hideLoading()
+      console.error('头像上传失败:', error)
+      wx.showToast({
+        title: '头像上传失败',
+        icon: 'none'
+      })
+    }
+  },
+
+  // 编辑昵称
+  onEditNickname() {
+    this.setData({
+      isEditingNickname: true,
+      tempNickname: this.data.userInfo.nickName
+    })
+  },
+
+  // 昵称输入
+  onNicknameInput(e) {
+    this.setData({
+      tempNickname: e.detail.value
+    })
+  },
+
+  // 昵称失焦（完成编辑）
+  async onNicknameBlur() {
+    const nickname = this.data.tempNickname.trim()
+
+    this.setData({
+      isEditingNickname: false
+    })
+
+    if (!nickname || nickname === this.data.userInfo.nickName) {
+      return
+    }
+
+    try {
+      wx.showLoading({ title: '保存中...' })
+
+      await this.updateUserInfo({
+        nickName: nickname
+      })
+
+      wx.hideLoading()
+      wx.showToast({
+        title: '昵称更新成功',
+        icon: 'success'
+      })
+    } catch (error) {
+      wx.hideLoading()
+      console.error('昵称更新失败:', error)
+      wx.showToast({
+        title: '昵称更新失败',
+        icon: 'none'
+      })
+    }
+  },
+
+  // 更新用户信息到数据库
+  async updateUserInfo(updates) {
+    try {
+      // 调用云函数更新用户信息
+      const res = await wx.cloud.callFunction({
+        name: 'updateUserInfo',
+        data: updates
+      });
+
+      console.log('更新用户信息成功', res);
+
+      if (!res.result.success) {
+        throw new Error(res.result.error);
+      }
+
+      // 更新本地状态
+      this.setData({
+        userInfo: {
+          ...this.data.userInfo,
+          ...updates
+        }
+      });
+
+      // 更新本地缓存
+      const userInfo = { ...this.data.userInfo, ...updates };
+      wx.setStorageSync('userInfo', userInfo);
+    } catch (error) {
+      console.error('更新用户信息失败:', error);
+      throw error;
     }
   },
 

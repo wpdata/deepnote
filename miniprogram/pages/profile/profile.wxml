@@ -1,9 +1,24 @@
 <view class="container">
   <!-- 用户信息卡片 -->
   <view class="user-card">
-    <view class="avatar">{{userInfo.avatarUrl ? '' : '👤'}}</view>
+    <button class="avatar-btn" open-type="chooseAvatar" bindchooseavatar="onChooseAvatar">
+      <image wx:if="{{userInfo.avatarUrl}}" class="avatar-img" src="{{userInfo.avatarUrl}}" mode="aspectFill" />
+      <view wx:else class="avatar-placeholder">👤</view>
+    </button>
     <view class="user-info">
-      <text class="username">{{userInfo.nickName || '智能错题本用户'}}</text>
+      <view class="nickname-container">
+        <input
+          wx:if="{{isEditingNickname}}"
+          class="nickname-input"
+          type="nickname"
+          value="{{userInfo.nickName}}"
+          bindblur="onNicknameBlur"
+          bindinput="onNicknameInput"
+          placeholder="请输入昵称"
+          auto-focus
+        />
+        <text wx:else class="username" bindtap="onEditNickname">{{userInfo.nickName || '点击设置昵称'}}</text>
+      </view>
       <text class="study-days">已学习 {{userInfo.studyDays}} 天</text>
     </view>
   </view>
