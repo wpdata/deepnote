@@ -1,0 +1,265 @@
+.container {
+  min-height: 100vh;
+  background: linear-gradient(180deg, #F0F7FF 0%, #FFFFFF 100%);
+  padding: 32rpx;
+}
+
+/* 顶部说明 */
+.header {
+  text-align: center;
+  margin-bottom: 48rpx;
+}
+
+.title {
+  font-size: 48rpx;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 16rpx;
+}
+
+.subtitle {
+  font-size: 26rpx;
+  color: #666;
+}
+
+/* 上传区域 */
+.upload-area {
+  margin-bottom: 48rpx;
+}
+
+.upload-box {
+  background: #FFFFFF;
+  border: 3rpx dashed #1677FF;
+  border-radius: 24rpx;
+  padding: 120rpx 48rpx;
+  text-align: center;
+  transition: all 0.3s;
+}
+
+.upload-box:active {
+  transform: scale(0.98);
+  background: #F7FBFF;
+}
+
+.upload-emoji {
+  display: block;
+  font-size: 120rpx;
+  margin-bottom: 24rpx;
+}
+
+.upload-text {
+  display: block;
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 12rpx;
+}
+
+.upload-hint {
+  font-size: 24rpx;
+  color: #999;
+}
+
+/* 预览区域 */
+.preview-area {
+  background: #FFFFFF;
+  border-radius: 24rpx;
+  padding: 32rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.08);
+}
+
+.preview-image {
+  width: 100%;
+  border-radius: 16rpx;
+  margin-bottom: 32rpx;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 24rpx;
+}
+
+.action-btn {
+  flex: 1;
+  height: 88rpx;
+  line-height: 88rpx;
+  border-radius: 44rpx;
+  font-size: 32rpx;
+  font-weight: 600;
+  border: none;
+}
+
+.action-btn.primary {
+  background: linear-gradient(135deg, #1677FF 0%, #0D5BDD 100%);
+  color: #FFFFFF;
+}
+
+.action-btn.secondary {
+  background: #F5F5F5;
+  color: #666;
+}
+
+.action-btn[disabled] {
+  opacity: 0.6;
+}
+
+/* 结果区域 */
+.result-area {
+  animation: fadeIn 0.5s;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20rpx);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 统计卡片 */
+.stats-card {
+  background: #FFFFFF;
+  border-radius: 24rpx;
+  padding: 40rpx 32rpx;
+  margin-bottom: 32rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.08);
+  display: flex;
+  justify-content: space-around;
+}
+
+.stat-item {
+  text-align: center;
+}
+
+.stat-value {
+  display: block;
+  font-size: 48rpx;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 8rpx;
+}
+
+.stat-item.correct .stat-value {
+  color: #52C41A;
+}
+
+.stat-item.wrong .stat-value {
+  color: #FF4D4F;
+}
+
+.stat-label {
+  font-size: 24rpx;
+  color: #999;
+}
+
+/* 错题列表 */
+.wrong-list {
+  background: #FFFFFF;
+  border-radius: 24rpx;
+  padding: 32rpx;
+  margin-bottom: 32rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.08);
+}
+
+.list-header {
+  margin-bottom: 24rpx;
+}
+
+.list-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #333;
+}
+
+.wrong-item {
+  background: #FFF7F7;
+  border-radius: 16rpx;
+  padding: 24rpx;
+  margin-bottom: 16rpx;
+  border-left: 6rpx solid #FF4D4F;
+}
+
+.wrong-item:last-child {
+  margin-bottom: 0;
+}
+
+.item-number {
+  font-size: 24rpx;
+  color: #FF4D4F;
+  margin-bottom: 12rpx;
+  font-weight: 600;
+}
+
+.item-content {
+  background: #FFFFFF;
+  padding: 20rpx;
+  border-radius: 12rpx;
+}
+
+.expression {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 16rpx;
+  font-family: 'Courier New', monospace;
+}
+
+.answer-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8rpx;
+  font-size: 28rpx;
+}
+
+.answer-row:last-child {
+  margin-bottom: 0;
+}
+
+.label {
+  color: #666;
+  margin-right: 12rpx;
+}
+
+.user-answer {
+  color: #FF4D4F;
+  font-weight: 600;
+  text-decoration: line-through;
+}
+
+.correct-answer {
+  color: #52C41A;
+  font-weight: 600;
+}
+
+/* 全对提示 */
+.perfect-tip {
+  background: linear-gradient(135deg, #52C41A 0%, #73D13D 100%);
+  border-radius: 24rpx;
+  padding: 80rpx 48rpx;
+  text-align: center;
+  margin-bottom: 32rpx;
+  box-shadow: 0 8rpx 24rpx rgba(82, 196, 26, 0.3);
+}
+
+.perfect-icon {
+  width: 120rpx;
+  height: 120rpx;
+  margin-bottom: 24rpx;
+}
+
+.perfect-text {
+  display: block;
+  font-size: 36rpx;
+  font-weight: 600;
+  color: #FFFFFF;
+}
+
+/* 底部操作 */
+.bottom-actions {
+  display: flex;
+  gap: 24rpx;
+  margin-top: 32rpx;
+}

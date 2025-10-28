@@ -25,7 +25,14 @@ exports.main = async (event, context) => {
     subject,
     knowledgePoint,
     imageUrl = '',
-    difficulty = 'medium'
+    difficulty = 'medium',
+    questionType = '未知',
+    userAnswer = '',
+    correctAnswer = '',
+    isCorrect = null,
+    aiAnalysisText = '',    // AI分析文本
+    mode = 'add',           // 新增模式参数: 'add'=新增, 'update'=更新
+    errorId = null          // 更新时需要提供errorId
   } = event
 
   // 获取openid，测试环境使用固定值
@@ -41,30 +48,66 @@ exports.main = async (event, context) => {
   }
 
   try {
-    // 1. 保存错题到 errors 集合
+    // 更新模式
+    if (mode === 'update' && errorId) {
+      const updateResult = await db.collection('errors')
+        .doc(errorId)
+        .update({
+          data: {
+            subject,
+            knowledgePoint,
+            difficulty,
+            questionType,
+            content,
+            imageUrl,
+            userAnswer,
+            correctAnswer,
+            isCorrect,
+            answer: correctAnswer || '',
+            aiAnalysis: aiAnalysisText,  // 更新AI分析
+            updateTime: new Date()
+          }
+        })
+
+      return {
+        success: true,
+        errorId,
+        mode: 'update',
+        message: '错题更新成功'
+      }
+    }
+
+    // 新增模式
     const errorResult = await db.collection('errors').add({
       data: {
         _openid: openid,
         subject,
         knowledgePoint,
         difficulty,
+        questionType,
         content,
         imageUrl,
-        answer: '',  // 待填充
+        // 答案相关字段
+        userAnswer,        // 学生填写的答案
+        correctAnswer,     // 正确答案
+        isCorrect,         // 是否正确 (true/false/null)
+        answer: correctAnswer || '',  // 兼容旧字段
+        // AI分析
+        aiAnalysis: aiAnalysisText,  // DeepSeek生成的专业分析
+        // 练习统计
         mastered: false,
         masteredTime: null,
         practiceCount: 0,
         correctCount: 0,
         wrongCount: 0,
         lastPracticeTime: null,
-        aiAnalysis: null,  // 待AI分析
         relatedKnowledge: [],
         createTime: new Date(),
         updateTime: new Date()
       }
     })
 
-    const errorId = errorResult._id
+    const newErrorId = errorResult._id
 
     // 2. 更新用户统计
     await updateUserStats(openid, 'addError')
@@ -74,12 +117,12 @@ exports.main = async (event, context) => {
 
     // 4. 如果有OCR记录，标记为已采纳
     if (imageUrl) {
-      await markOCRAsAdopted(openid, imageUrl, errorId)
+      await markOCRAsAdopted(openid, imageUrl, newErrorId)
     }
 
     return {
       success: true,
-      errorId,
+      errorId: newErrorId,
       message: '错题保存成功'
     }
 

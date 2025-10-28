@@ -1,9 +1,9 @@
 Page({
   data: {
     stats: {
-      totalErrors: 120,
-      masteredCount: 85,
-      needImprove: 35
+      totalErrors: 0,
+      masteredCount: 0,
+      needImprove: 0
     },
     subjects: [
       {
@@ -11,69 +11,46 @@ Page({
         name: '数学',
         bgColor: '#E3F2FD',
         icon: '🔢',
-        progress: 75
+        progress: 0
       },
       {
-        id: 'literature',
-        name: '文学',
+        id: 'arithmetic',
+        name: '算数',
+        bgColor: '#FFF9E6',
+        icon: '🧮',
+        progress: 0
+      },
+      {
+        id: 'chinese',
+        name: '语文',
         bgColor: '#FCE4EC',
         icon: '📚',
-        progress: 60
+        progress: 0
       },
       {
         id: 'english',
         name: '英语',
         bgColor: '#F3E5F5',
         icon: '🔤',
-        progress: 85
-      },
-      {
-        id: 'physics',
-        name: '物理',
-        bgColor: '#E8F5E9',
-        icon: '⚛️',
-        progress: 70
-      },
-      {
-        id: 'chemistry',
-        name: '化学',
-        bgColor: '#FFF3E0',
-        icon: '🧪',
-        progress: 45
-      },
-      {
-        id: 'biology',
-        name: '生物',
-        bgColor: '#E0F2F1',
-        icon: '🧬',
-        progress: 90
+        progress: 0
       }
-    ]
+    ],
+    refreshing: false  // 下拉刷新状态
   },
 
   onLoad() {
-    // 初始化云开发
-    if (!wx.cloud) {
-      console.error('请使用 2.2.3 或以上的基础库以使用云能力')
-    } else {
-      wx.cloud.init({
-        env: 'deepnote-3g0lr0fb3ce6ea1c',
-        traceUser: true
-      })
-    }
-
     // 加载数据
     this.loadData()
   },
 
   async loadData() {
     try {
-      // 调用云函数获取用户统计数据
       wx.showLoading({
         title: '加载中...',
         mask: true
       })
 
+      // 调用云函数获取用户统计数据
       const res = await wx.cloud.callFunction({
         name: 'getUserStats'
       })
@@ -81,13 +58,35 @@ Page({
       console.log('获取用户统计成功', res.result)
 
       if (res.result.success) {
+        const stats = res.result.stats
+
+        // 更新顶部统计数据
         this.setData({
           stats: {
-            totalErrors: res.result.stats.totalErrors,
-            masteredCount: res.result.stats.masteredErrors,
-            needImprove: res.result.stats.needImprove
+            totalErrors: stats.totalErrors,
+            masteredCount: stats.masteredErrors,
+            needImprove: stats.needImprove
           }
         })
+
+        // 更新学科进度数据
+        if (stats.subjects && stats.subjects.length > 0) {
+          const subjectsData = this.data.subjects.map(subject => {
+            // 查找对应学科的统计数据
+            const subjectStat = stats.subjects.find(s => s.subject === subject.name)
+            if (subjectStat) {
+              return {
+                ...subject,
+                progress: subjectStat.masteredRate
+              }
+            }
+            return subject
+          })
+
+          this.setData({
+            subjects: subjectsData
+          })
+        }
       } else {
         throw new Error(res.result.error || '获取统计数据失败')
       }
@@ -147,5 +146,41 @@ Page({
       title: '设置功能开发中',
       icon: 'none'
     })
+  },
+
+  // 跳转到口算检查页面
+  goToMathCheck() {
+    wx.navigateTo({
+      url: '/pages/math-check/math-check'
+    })
+  },
+
+  // 下拉刷新
+  async onPullDownRefresh() {
+    console.log('用户下拉刷新首页')
+    this.setData({
+      refreshing: true
+    })
+
+    try {
+      await this.loadData()
+
+      wx.showToast({
+        title: '刷新成功',
+        icon: 'success',
+        duration: 1000
+      })
+    } catch (error) {
+      console.error('刷新失败', error)
+      wx.showToast({
+        title: '刷新失败',
+        icon: 'none'
+      })
+    } finally {
+      // 结束刷新状态
+      this.setData({
+        refreshing: false
+      })
+    }
   }
 })

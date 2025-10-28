@@ -1,4 +1,4 @@
-<view class="container">
+<scroll-view class="container" scroll-y="true" refresher-enabled="{{true}}" refresher-triggered="{{refreshing}}" bindrefresherrefresh="onPullDownRefresh" enable-back-to-top="{{true}}">
   <!-- 顶部栏 -->
   <view class="header">
     <text class="title">首页</text>
@@ -18,6 +18,19 @@
     <view class="stat-card">
       <text class="stat-label">需要改进</text>
       <text class="stat-value">{{stats.needImprove}}</text>
+    </view>
+  </view>
+
+  <!-- 快捷功能 -->
+  <view class="section-title">快捷功能</view>
+  <view class="quick-actions">
+    <view class="action-card math-check" bindtap="goToMathCheck">
+      <view class="action-icon">🧮</view>
+      <view class="action-info">
+        <text class="action-name">口算检查</text>
+        <text class="action-desc">拍照批改口算作业</text>
+      </view>
+      <text class="action-arrow">→</text>
     </view>
   </view>
 
@@ -51,4 +64,4 @@
       </view>
     </view>
   </view>
-</view>
+</scroll-view>

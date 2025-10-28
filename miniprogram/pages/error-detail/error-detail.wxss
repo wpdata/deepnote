@@ -75,6 +75,58 @@
   margin-top: 20rpx;
 }
 
+/* 答案卡片 */
+.answer-card {
+  background-color: #FFFFFF;
+  border-radius: 16rpx;
+  padding: 30rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.06);
+}
+
+.answer-section {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20rpx;
+}
+
+.answer-section:last-child {
+  margin-bottom: 0;
+}
+
+.answer-label {
+  font-size: 26rpx;
+  color: #999;
+  min-width: 140rpx;
+}
+
+.answer-value {
+  font-size: 28rpx;
+  color: #333;
+  font-weight: 500;
+}
+
+.answer-value.correct {
+  color: #52C41A;
+}
+
+.result-tag {
+  padding: 6rpx 16rpx;
+  border-radius: 12rpx;
+  font-size: 24rpx;
+  font-weight: 500;
+}
+
+.result-tag.correct {
+  background-color: #F6FFED;
+  color: #52C41A;
+}
+
+.result-tag.wrong {
+  background-color: #FFF1F0;
+  color: #FF4D4F;
+}
+
 /* AI 分析卡片 */
 .analysis-card,
 .related-card {

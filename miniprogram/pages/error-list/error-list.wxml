@@ -1,0 +1,39 @@
+<view class="container">
+  <!-- 页面标题 -->
+  <view class="header">
+    <view class="title">{{knowledgePoint}}</view>
+    <view class="subtitle">{{subject}} · 共 {{errorList.length}} 道错题</view>
+  </view>
+
+  <!-- 错题列表 -->
+  <view class="error-list">
+    <view
+      class="error-item"
+      wx:for="{{errorList}}"
+      wx:key="_id"
+      bindtap="goToDetail"
+      data-id="{{item._id}}"
+    >
+      <view class="error-header">
+        <view class="error-number">错题 {{index + 1}}</view>
+        <view class="mastered-badge {{item.mastered ? 'mastered' : ''}}">
+          {{item.mastered ? '已掌握' : '待复习'}}
+        </view>
+      </view>
+
+      <view class="error-content">
+        {{item.content}}
+      </view>
+
+      <view class="error-footer">
+        <text class="difficulty">难度: {{item.difficulty === 'easy' ? '简单' : item.difficulty === 'medium' ? '中等' : '困难'}}</text>
+        <text class="arrow">→</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 空状态 -->
+  <view class="empty" wx:if="{{errorList.length === 0}}">
+    <text class="empty-text">暂无错题</text>
+  </view>
+</view>

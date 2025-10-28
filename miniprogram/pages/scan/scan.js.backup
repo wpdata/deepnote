@@ -1,0 +1,396 @@
+Page({
+  data: {
+    imageUrl: '',
+    recognizing: false,
+    recognized: false,
+    editing: false,
+    progress: 0,
+    recognizedText: '',
+    subjects: ['数学', '文学', '英语', '物理', '化学', '生物'],
+    subjectIndex: 0,
+    knowledgePoint: '',
+    aiSuggestion: null,
+    // 多题目相关
+    hasMultipleQuestions: false,
+    questions: [],
+    currentQuestionIndex: 0,
+    // 新增: 坐标裁剪模式
+    mode: 'normal',  // 'normal' | 'crop_preview' | 'formatted_preview'
+    croppedQuestions: [],  // 裁剪后的题目预览
+    formattedQuestions: [], // 格式化后的题目
+    uploadedFileID: '',  // 上传的文件ID
+    originalImageUrl: ''  // 原图URL
+  },
+
+  chooseImage() {
+    wx.chooseMedia({
+      count: 1,
+      mediaType: ['image'],
+      sourceType: ['album', 'camera'],
+      success: (res) => {
+        this.setData({
+          imageUrl: res.tempFiles[0].tempFilePath
+        })
+        this.startRecognition()
+      }
+    })
+  },
+
+  takePhoto() {
+    wx.chooseMedia({
+      count: 1,
+      mediaType: ['image'],
+      sourceType: ['camera'],
+      success: (res) => {
+        this.setData({
+          imageUrl: res.tempFiles[0].tempFilePath
+        })
+        this.startRecognition()
+      }
+    })
+  },
+
+  chooseFromAlbum() {
+    wx.chooseMedia({
+      count: 1,
+      mediaType: ['image'],
+      sourceType: ['album'],
+      success: (res) => {
+        this.setData({
+          imageUrl: res.tempFiles[0].tempFilePath
+        })
+        this.startRecognition()
+      }
+    })
+  },
+
+  async startRecognition() {
+    this.setData({
+      recognizing: true,
+      progress: 0
+    })
+
+    // 模拟识别进度动画
+    const timer = setInterval(() => {
+      if (this.data.progress < 90) {
+        this.setData({
+          progress: this.data.progress + 10
+        })
+      }
+    }, 200)
+
+    try {
+      // 1. 先上传图片到云存储
+      const uploadRes = await wx.cloud.uploadFile({
+        cloudPath: `ocr/${Date.now()}-${Math.random().toString(36).substr(2)}.jpg`,
+        filePath: this.data.imageUrl
+      })
+
+      console.log('图片上传成功', uploadRes.fileID)
+
+      this.setData({
+        uploadedFileID: uploadRes.fileID
+      })
+
+      // 2. 尝试获取题目坐标
+      const coordRes = await wx.cloud.callFunction({
+        name: 'ocrRecognize',
+        data: {
+          action: 'getCoordinates',
+          fileID: uploadRes.fileID
+        }
+      })
+
+      clearInterval(timer)
+
+      console.log('坐标获取结果', coordRes.result)
+
+      // 判断是否有坐标数据
+      if (coordRes.result.success && coordRes.result.coordinates && coordRes.result.coordinates.length > 0) {
+        // 有坐标,进入裁剪预览模式
+        console.log(`检测到${coordRes.result.coordinates.length}个题目区域`)
+        this.showCropPreview(coordRes.result)
+      } else {
+        // 没有坐标,降级到整页识别
+        console.log('未检测到坐标,使用整页识别')
+        this.fallbackToFullPage(uploadRes.fileID)
+      }
+
+      if (ocrRes.result.success) {
+        const result = ocrRes.result
+
+        // 检查是否有多个题目
+        if (result.hasMultipleQuestions && result.questions && result.questions.length > 1) {
+          // 多题目模式
+          const firstQuestion = result.questions[0]
+          const aiAnalysis = firstQuestion.aiAnalysis || {}
+
+          // 自动设置学科索引
+          let subjectIndex = 0
+          if (aiAnalysis.subject) {
+            const index = this.data.subjects.indexOf(aiAnalysis.subject)
+            if (index >= 0) {
+              subjectIndex = index
+            }
+          }
+
+          this.setData({
+            recognizing: false,
+            recognized: true,
+            progress: 100,
+            uploadedFileID: uploadRes.fileID,
+            // 多题目数据
+            hasMultipleQuestions: true,
+            questions: result.questions,
+            currentQuestionIndex: 0,
+            // 显示第一题
+            recognizedText: firstQuestion.text,
+            subjectIndex: subjectIndex,
+            knowledgePoint: aiAnalysis.knowledgePoint || '',
+            aiSuggestion: {
+              difficulty: aiAnalysis.difficulty || '中等',
+              questionType: aiAnalysis.questionType || '未知'
+            }
+          })
+
+          // 显示多题目提示
+          wx.showToast({
+            title: `识别到${result.questions.length}个题目`,
+            icon: 'success',
+            duration: 2000
+          })
+
+        } else {
+          // 单题目模式（保持原有逻辑）
+          const aiAnalysis = result.aiAnalysis || {}
+
+          // 自动设置学科索引
+          let subjectIndex = 0
+          if (aiAnalysis.subject) {
+            const index = this.data.subjects.indexOf(aiAnalysis.subject)
+            if (index >= 0) {
+              subjectIndex = index
+            }
+          }
+
+          this.setData({
+            recognizing: false,
+            recognized: true,
+            progress: 100,
+            recognizedText: result.text,
+            uploadedFileID: uploadRes.fileID,
+            hasMultipleQuestions: false,
+            // 自动填充AI分析结果
+            subjectIndex: subjectIndex,
+            knowledgePoint: aiAnalysis.knowledgePoint || '',
+            aiSuggestion: {
+              difficulty: aiAnalysis.difficulty || '中等',
+              questionType: aiAnalysis.questionType || '未知'
+            }
+          })
+
+          // 显示AI分析提示
+          if (aiAnalysis.subject && aiAnalysis.knowledgePoint) {
+            wx.showToast({
+              title: `已识别：${aiAnalysis.subject} - ${aiAnalysis.knowledgePoint}`,
+              icon: 'none',
+              duration: 2000
+            })
+          }
+        }
+      } else {
+        throw new Error(ocrRes.result.error || 'OCR识别失败')
+      }
+    } catch (error) {
+      clearInterval(timer)
+      console.error('OCR识别失败', error)
+
+      this.setData({
+        recognizing: false,
+        recognized: false
+      })
+
+      wx.showToast({
+        title: '识别失败，请重试',
+        icon: 'none'
+      })
+    }
+  },
+
+  callOCRFunction() {
+    // 上传图片到云存储
+    const cloudPath = `ocr/${Date.now()}-${Math.random()}.jpg`
+
+    wx.cloud.uploadFile({
+      cloudPath,
+      filePath: this.data.imageUrl,
+      success: (uploadRes) => {
+        // 调用云函数进行OCR识别
+        wx.cloud.callFunction({
+          name: 'ocrRecognize',
+          data: {
+            fileID: uploadRes.fileID
+          },
+          success: (res) => {
+            this.setData({
+              recognizing: false,
+              recognized: true,
+              recognizedText: res.result.text
+            })
+          },
+          fail: (err) => {
+            console.error('OCR识别失败', err)
+            wx.showToast({
+              title: '识别失败，请重试',
+              icon: 'none'
+            })
+            this.reRecognize()
+          }
+        })
+      }
+    })
+  },
+
+  editResult() {
+    this.setData({
+      editing: !this.data.editing
+    })
+  },
+
+  onTextInput(e) {
+    this.setData({
+      recognizedText: e.detail.value
+    })
+  },
+
+  onSubjectChange(e) {
+    this.setData({
+      subjectIndex: e.detail.value
+    })
+  },
+
+  onKnowledgeInput(e) {
+    this.setData({
+      knowledgePoint: e.detail.value
+    })
+  },
+
+  // 切换题目
+  switchQuestion(e) {
+    const index = e.currentTarget.dataset.index
+    if (index === this.data.currentQuestionIndex) return
+
+    const question = this.data.questions[index]
+    const aiAnalysis = question.aiAnalysis || {}
+
+    // 自动设置学科索引
+    let subjectIndex = 0
+    if (aiAnalysis.subject) {
+      const subIndex = this.data.subjects.indexOf(aiAnalysis.subject)
+      if (subIndex >= 0) {
+        subjectIndex = subIndex
+      }
+    }
+
+    this.setData({
+      currentQuestionIndex: index,
+      recognizedText: question.text,
+      subjectIndex: subjectIndex,
+      knowledgePoint: aiAnalysis.knowledgePoint || '',
+      aiSuggestion: {
+        difficulty: aiAnalysis.difficulty || '中等',
+        questionType: aiAnalysis.questionType || '未知'
+      }
+    })
+  },
+
+  deleteResult() {
+    wx.showModal({
+      title: '确认删除',
+      content: '确定要删除这个识别结果吗？',
+      confirmColor: '#ff4444',
+      success: (res) => {
+        if (res.confirm) {
+          this.reRecognize()
+          wx.showToast({
+            title: '已删除',
+            icon: 'success'
+          })
+        }
+      }
+    })
+  },
+
+  reRecognize() {
+    this.setData({
+      imageUrl: '',
+      recognizing: false,
+      recognized: false,
+      editing: false,
+      recognizedText: '',
+      knowledgePoint: '',
+      hasMultipleQuestions: false,
+      questions: [],
+      currentQuestionIndex: 0,
+      aiSuggestion: null
+    })
+  },
+
+  async confirmAdd() {
+    if (!this.data.knowledgePoint) {
+      wx.showToast({
+        title: '请输入知识点',
+        icon: 'none'
+      })
+      return
+    }
+
+    wx.showLoading({
+      title: '添加中...',
+      mask: true
+    })
+
+    try {
+      // 调用 saveError 云函数保存错题
+      const res = await wx.cloud.callFunction({
+        name: 'saveError',
+        data: {
+          content: this.data.recognizedText,
+          subject: this.data.subjects[this.data.subjectIndex],
+          knowledgePoint: this.data.knowledgePoint,
+          imageUrl: this.data.uploadedFileID || '', // 使用云存储ID
+          difficulty: this.data.aiSuggestion ? this.data.aiSuggestion.difficulty : 'medium',  // 使用AI评估的难度
+          questionType: this.data.aiSuggestion ? this.data.aiSuggestion.questionType : '未知'  // 保存题型
+        }
+      })
+
+      console.log('保存错题成功', res.result)
+
+      wx.hideLoading()
+
+      if (res.result.success) {
+        wx.showToast({
+          title: '添加成功',
+          icon: 'success'
+        })
+
+        // 1.5秒后跳转到错题本
+        setTimeout(() => {
+          this.reRecognize() // 重置状态
+          wx.switchTab({
+            url: '/pages/errorbook/errorbook'
+          })
+        }, 1500)
+      } else {
+        throw new Error(res.result.message || '添加失败')
+      }
+    } catch (error) {
+      wx.hideLoading()
+      console.error('添加错题失败', error)
+      wx.showToast({
+        title: error.message || '添加失败，请重试',
+        icon: 'none'
+      })
+    }
+  }
+})

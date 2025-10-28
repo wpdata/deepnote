@@ -1,0 +1,54 @@
+{
+  "envId": "deepnote-3g0lr0fb3ce6ea1c",
+  "functionRoot": "cloudfunctions",
+  "functions": [
+    {
+      "name": "getUserStats",
+      "timeout": 60,
+      "envVariables": {},
+      "runtime": "Nodejs18.15",
+      "memorySize": 256,
+      "handler": "index.main"
+    },
+    {
+      "name": "ocrRecognize",
+      "timeout": 60,
+      "envVariables": {},
+      "runtime": "Nodejs18.15",
+      "memorySize": 256,
+      "handler": "index.main"
+    },
+    {
+      "name": "saveError",
+      "timeout": 60,
+      "envVariables": {},
+      "runtime": "Nodejs18.15",
+      "memorySize": 256,
+      "handler": "index.main"
+    },
+    {
+      "name": "getErrorDetail",
+      "timeout": 60,
+      "envVariables": {},
+      "runtime": "Nodejs18.15",
+      "memorySize": 256,
+      "handler": "index.main"
+    },
+    {
+      "name": "updateErrorStatus",
+      "timeout": 60,
+      "envVariables": {},
+      "runtime": "Nodejs18.15",
+      "memorySize": 256,
+      "handler": "index.main"
+    },
+    {
+      "name": "generatePractice",
+      "timeout": 60,
+      "envVariables": {},
+      "runtime": "Nodejs18.15",
+      "memorySize": 256,
+      "handler": "index.main"
+    }
+  ]
+}

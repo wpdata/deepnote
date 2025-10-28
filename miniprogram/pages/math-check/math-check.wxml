@@ -1,0 +1,85 @@
+<view class="container">
+  <!-- 顶部说明 -->
+  <view class="header">
+    <view class="title">📐 算数检查</view>
+    <view class="subtitle">拍照上传算数作业，AI自动批改</view>
+  </view>
+
+  <!-- 拍照/选择图片区域 -->
+  <view wx:if="{{!imageUrl}}" class="upload-area">
+    <view class="upload-box" bindtap="chooseImage">
+      <text class="upload-emoji">📷</text>
+      <text class="upload-text">拍照或选择图片</text>
+      <text class="upload-hint">支持加减乘除算数题</text>
+    </view>
+  </view>
+
+  <!-- 图片预览区域 -->
+  <view wx:if="{{imageUrl && !checkResult}}" class="preview-area">
+    <image class="preview-image" src="{{imageUrl}}" mode="widthFix"></image>
+    <view class="action-buttons">
+      <button class="action-btn secondary" bindtap="reChooseImage">重新选择</button>
+      <button class="action-btn primary" bindtap="startCheck" disabled="{{checking}}">
+        {{checking ? '检查中...' : '开始检查'}}
+      </button>
+    </view>
+  </view>
+
+  <!-- 检查结果区域 -->
+  <view wx:if="{{checkResult}}" class="result-area">
+    <!-- 统计卡片 -->
+    <view class="stats-card">
+      <view class="stat-item">
+        <text class="stat-value">{{checkResult.totalCount}}</text>
+        <text class="stat-label">总题数</text>
+      </view>
+      <view class="stat-item correct">
+        <text class="stat-value">{{checkResult.correctCount}}</text>
+        <text class="stat-label">正确</text>
+      </view>
+      <view class="stat-item wrong">
+        <text class="stat-value">{{checkResult.wrongCount}}</text>
+        <text class="stat-label">错误</text>
+      </view>
+      <view class="stat-item">
+        <text class="stat-value">{{checkResult.score}}分</text>
+        <text class="stat-label">得分</text>
+      </view>
+    </view>
+
+    <!-- 错题列表 -->
+    <view wx:if="{{checkResult.wrongCount > 0}}" class="wrong-list">
+      <view class="list-header">
+        <text class="list-title">❌ 错题明细</text>
+      </view>
+      <view class="wrong-item" wx:for="{{checkResult.wrongItems}}" wx:key="index">
+        <view class="item-number">第{{item.index + 1}}题</view>
+        <view class="item-content">
+          <view class="expression">{{item.expression}}</view>
+          <view class="answer-row">
+            <text class="label">我的答案：</text>
+            <text class="user-answer wrong">{{item.userAnswer}}</text>
+          </view>
+          <view class="answer-row">
+            <text class="label">正确答案：</text>
+            <text class="correct-answer">{{item.correctAnswer}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 全对提示 -->
+    <view wx:if="{{checkResult.wrongCount === 0}}" class="perfect-tip">
+      <image class="perfect-icon" src="/images/happy.png" mode="aspectFit"></image>
+      <text class="perfect-text">太棒了！全部正确！</text>
+    </view>
+
+    <!-- 底部操作按钮 -->
+    <view class="bottom-actions">
+      <button class="action-btn secondary" bindtap="reCheck">重新检查</button>
+      <button wx:if="{{checkResult.wrongCount > 0}}" class="action-btn primary" bindtap="saveToErrorBook">
+        保存到错题本
+      </button>
+    </view>
+  </view>
+</view>

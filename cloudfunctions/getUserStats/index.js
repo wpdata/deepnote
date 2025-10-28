@@ -19,42 +19,36 @@ exports.main = async (event, context) => {
   const openid = wxContext.OPENID || 'test_user_openid'
 
   try {
-    // 1. 获取用户基本统计
-    let userStats = null
-    const userResult = await db.collection('users')
-      .where({ _openid: openid })
-      .get()
+    // 直接从 errors 集合获取所有错题数据进行实时统计
+    const errorsResult = await db.collection('errors').limit(100).get()
+    const allErrors = errorsResult.data
 
-    if (userResult.data.length > 0) {
-      userStats = userResult.data[0]
-    } else {
-      // 如果用户不存在，创建默认数据
-      userStats = {
-        studyDays: 0,
-        totalErrors: 0,
-        masteredErrors: 0,
-        practiceCount: 0
-      }
-    }
+    console.log('查询到错题数量:', allErrors.length)
 
-    // 2. 获取各学科的错题统计
-    const subjectStats = await db.collection('knowledge_stats')
-      .where({ _openid: openid })
-      .get()
+    // 1. 计算总体统计
+    const totalErrors = allErrors.length
+    const masteredErrors = allErrors.filter(e => e.mastered).length
+    const needImprove = totalErrors - masteredErrors
+    const masteredRate = totalErrors > 0
+      ? Math.round((masteredErrors / totalErrors) * 100)
+      : 0
 
-    // 按学科汇总
+    // 2. 按学科统计
     const subjectSummary = {}
-    subjectStats.data.forEach(stat => {
-      if (!subjectSummary[stat.subject]) {
-        subjectSummary[stat.subject] = {
-          subject: stat.subject,
+    allErrors.forEach(error => {
+      const subject = error.subject
+      if (!subjectSummary[subject]) {
+        subjectSummary[subject] = {
+          subject: subject,
           totalErrors: 0,
           masteredErrors: 0,
           masteredRate: 0
         }
       }
-      subjectSummary[stat.subject].totalErrors += stat.totalErrors
-      subjectSummary[stat.subject].masteredErrors += stat.masteredErrors
+      subjectSummary[subject].totalErrors++
+      if (error.mastered) {
+        subjectSummary[subject].masteredErrors++
+      }
     })
 
     // 计算各学科掌握率
@@ -66,25 +60,31 @@ exports.main = async (event, context) => {
 
     // 3. 获取最近的练习记录
     const recentPractices = await db.collection('practices')
-      .where({ _openid: openid })
       .orderBy('createTime', 'desc')
       .limit(10)
       .get()
 
-    // 4. 计算总体掌握率
-    const masteredRate = userStats.totalErrors > 0
-      ? Math.round((userStats.masteredErrors / userStats.totalErrors) * 100)
-      : 0
+    // 4. 获取学习天数（从 users 表）
+    let studyDays = 0
+    let practiceCount = 0
+    const userResult = await db.collection('users')
+      .where({ _openid: openid })
+      .get()
+
+    if (userResult.data.length > 0) {
+      studyDays = userResult.data[0].studyDays || 0
+      practiceCount = userResult.data[0].practiceCount || 0
+    }
 
     return {
       success: true,
       stats: {
         // 基本统计
-        studyDays: userStats.studyDays,
-        totalErrors: userStats.totalErrors,
-        masteredErrors: userStats.masteredErrors,
-        needImprove: userStats.totalErrors - userStats.masteredErrors,
-        practiceCount: userStats.practiceCount,
+        studyDays,
+        totalErrors,
+        masteredErrors,
+        needImprove,
+        practiceCount,
         masteredRate,
 
         // 学科统计

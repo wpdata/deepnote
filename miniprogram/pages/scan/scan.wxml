@@ -1,78 +1,322 @@
 <view class="container">
-  <view class="header">
-    <text class="title">拍题识别</text>
-  </view>
-
-  <!-- 未上传状态 -->
-  <view class="upload-section" wx:if="{{!imageUrl && !recognizing}}">
-    <view class="upload-area" bindtap="chooseImage">
-      <text class="upload-icon">📷</text>
-      <text class="upload-text">点击拍照或选择图片</text>
-      <text class="upload-hint">支持 JPG、PNG 格式</text>
-    </view>
-
-    <view class="action-buttons">
-      <button class="action-btn primary" bindtap="takePhoto">
-        <text class="btn-icon">📷</text>
-        拍照识别
-      </button>
-      <button class="action-btn secondary" bindtap="chooseFromAlbum">
-        <text class="btn-icon">🖼️</text>
-        从相册选择
+  <!-- 模式1: 上传/拍照 -->
+  <view wx:if="{{mode === 'upload'}}" class="upload-section">
+    <view class="header">
+      <text class="title">拍题识别</text>
+      <button class="config-btn" bindtap="toggleConfig">
+        ⚙️ {{showConfig ? '收起' : '识别'}}设置
       </button>
     </view>
-  </view>
 
-  <!-- 识别中状态 -->
-  <view class="recognizing-section" wx:if="{{recognizing}}">
-    <image class="preview-image" src="{{imageUrl}}" mode="aspectFit"></image>
-    <view class="progress-container">
-      <view class="progress-ring">
-        <view class="progress-value">{{progress}}%</view>
+    <!-- OCR配置面板 -->
+    <view wx:if="{{showConfig}}" class="config-panel">
+      <view class="config-title">识别设置</view>
+
+      <view class="config-item">
+        <text class="config-label">切割方式</text>
+        <picker mode="selector" range="{{cutTypeOptions}}" value="{{cutTypeIndex}}" bindchange="onCutTypeChange">
+          <view class="config-value">{{cutTypeOptions[cutTypeIndex]}} ▼</view>
+        </picker>
       </view>
-      <text class="progress-text">正在识别中...</text>
+
+      <view class="config-item">
+        <text class="config-label">图片类型</text>
+        <picker mode="selector" range="{{imageTypeOptions}}" value="{{imageTypeIndex}}" bindchange="onImageTypeChange">
+          <view class="config-value">{{imageTypeOptions[imageTypeIndex]}} ▼</view>
+        </picker>
+      </view>
+
+      <view class="config-item">
+        <text class="config-label">学科类型</text>
+        <picker mode="selector" range="{{subjectOptions}}" value="{{subjectSelectIndex}}" bindchange="onSubjectSelectChange">
+          <view class="config-value">{{subjectOptions[subjectSelectIndex]}} ▼</view>
+        </picker>
+      </view>
+
+      <view class="config-tip">
+        💡 提示: 准确的设置可以提高识别准确率
+      </view>
     </view>
-  </view>
 
-  <!-- 识别完成状态 -->
-  <view class="result-section" wx:if="{{recognized}}">
-    <image class="preview-image" src="{{imageUrl}}" mode="aspectFit"></image>
-
-    <view class="result-card">
-      <view class="result-header">
-        <text class="result-title">识别结果</text>
-        <button class="edit-btn" bindtap="editResult">编辑</button>
-      </view>
-
-      <view class="result-content">
-        <textarea
-          class="result-textarea"
-          value="{{recognizedText}}"
-          bindinput="onTextInput"
-          placeholder="识别的题目内容"
-          disabled="{{!editing}}"
-        ></textarea>
-      </view>
-
-      <view class="question-info">
-        <view class="info-item">
-          <text class="info-label">学科</text>
-          <picker bindchange="onSubjectChange" value="{{subjectIndex}}" range="{{subjects}}">
-            <view class="picker">
-              {{subjects[subjectIndex]}}
-            </view>
-          </picker>
+    <!-- 识别中 -->
+    <view wx:if="{{recognizing}}" class="recognizing-section">
+      <view class="progress-container">
+        <view class="progress-ring">
+          <text class="progress-value">{{progress}}%</text>
         </view>
-        <view class="info-item">
-          <text class="info-label">知识点</text>
-          <input class="info-input" value="{{knowledgePoint}}" bindinput="onKnowledgeInput" placeholder="请输入知识点" />
+        <text class="progress-text">正在识别中...</text>
+      </view>
+    </view>
+
+    <!-- 上传界面 -->
+    <view wx:else class="upload-area-container">
+      <view class="upload-area" bindtap="takePhoto">
+        <text class="upload-icon">📷</text>
+        <text class="upload-text">点击拍照识别</text>
+        <text class="upload-hint">支持 JPG、PNG 格式</text>
+      </view>
+
+      <!-- 拍照技巧提示 -->
+      <view class="photo-tips">
+        <view class="tips-title">📝 拍照技巧</view>
+        <view class="tips-content">
+          <text class="tip-item">• 确保光线充足，题目清晰可见</text>
+          <text class="tip-item">• 手写答案要清晰，避免涂改过多</text>
+          <text class="tip-item">• 尽量平铺拍摄，减少倾斜角度</text>
+          <text class="tip-item">• 如包含学生答案，请用圆圈或勾选标记</text>
         </view>
       </view>
 
       <view class="action-buttons">
-        <button class="action-btn secondary" bindtap="reRecognize">重新识别</button>
-        <button class="action-btn primary" bindtap="confirmAdd">确认添加到错题本</button>
+        <button class="action-btn primary" bindtap="takePhoto">
+          <text class="btn-icon">📷</text>
+          拍照识别
+        </button>
+        <button class="action-btn secondary" bindtap="chooseFromAlbum">
+          <text class="btn-icon">🖼️</text>
+          从相册选择
+        </button>
       </view>
     </view>
   </view>
+
+  <!-- 模式2: 裁剪预览 - 用户选择题目 -->
+  <view wx:if="{{mode === 'crop_preview'}}" class="crop-preview-mode">
+    <view class="header">
+      <text class="title">检测到 {{croppedQuestions.length}} 个题目</text>
+      <text class="subtitle">点击题目可取消选择(已选{{selectedCount}}题)</text>
+    </view>
+
+    <scroll-view scroll-y class="question-grid">
+      <view
+        wx:for="{{croppedQuestions}}"
+        wx:key="id"
+        class="question-item {{item.selected ? 'selected' : ''}}"
+        bindtap="toggleQuestion"
+        data-index="{{index}}"
+      >
+        <view class="question-header">
+          <text class="question-number">题目 {{index + 1}}</text>
+          <view wx:if="{{item.selected}}" class="selected-badge">✓</view>
+        </view>
+        <view class="question-image-wrapper">
+          <image
+            wx:if="{{item.croppedImage}}"
+            class="question-preview"
+            src="{{item.croppedImage}}"
+            mode="widthFix"
+          />
+          <view wx:else class="question-loading">
+            <text>裁剪中...</text>
+          </view>
+        </view>
+      </view>
+    </scroll-view>
+
+    <view class="action-bar">
+      <button class="action-btn secondary" bindtap="reRecognize">重新拍照</button>
+      <button
+        class="action-btn primary"
+        bindtap="confirmRecognize"
+        disabled="{{selectedCount === 0}}"
+      >
+        识别选中题目 ({{selectedCount}}题)
+      </button>
+    </view>
+  </view>
+
+  <!-- 模式3: 格式化预览 - 用户确认题目 -->
+  <view wx:if="{{mode === 'formatted_preview'}}" class="formatted-preview-mode">
+    <view class="header">
+      <text class="title">识别结果 ({{formattedQuestions.length}}题)</text>
+      <text class="subtitle">✏️ 可以编辑题目内容、学科、知识点等信息</text>
+    </view>
+
+    <scroll-view scroll-y class="formatted-list">
+      <view wx:for="{{formattedQuestions}}" wx:key="id" class="formatted-item">
+        <!-- 题目标题和操作按钮 -->
+        <view class="item-header">
+          <text class="item-title">📝 题目 {{index + 1}}</text>
+          <view class="item-right">
+            <text class="delete-btn" bindtap="deleteQuestion" data-index="{{index}}">🗑️ 删除</text>
+            <view class="badges">
+              <view class="ai-badge">🤖 AI推荐</view>
+              <view class="model-badge {{item.aiModel === 'qwen-math-turbo' ? 'model-math' : 'model-general'}}">
+                {{item.aiModel === 'qwen-math-turbo' ? '🧮 数学模型' : '💬 通用模型'}}
+              </view>
+            </view>
+          </view>
+        </view>
+
+        <!-- 题目文本编辑区 -->
+        <view class="edit-section">
+          <text class="section-label">题目内容</text>
+          <textarea
+            class="question-textarea"
+            value="{{item.formattedText}}"
+            bindinput="onQuestionTextInput"
+            data-index="{{index}}"
+            auto-height
+            maxlength="-1"
+            placeholder="编辑题目内容"
+            adjust-position="{{false}}"
+          />
+        </view>
+
+        <!-- 学科选择 -->
+        <view class="edit-section">
+          <text class="section-label">学科</text>
+          <picker
+            mode="selector"
+            range="{{subjectList}}"
+            value="{{item.subjectIndex}}"
+            bindchange="onSubjectChange"
+            data-id="{{item.id}}"
+            data-itemindex="{{index}}"
+          >
+            <view class="picker-view">
+              <text>{{item.aiAnalysis.subject || '请选择学科'}}</text>
+              <text class="picker-arrow">▼</text>
+            </view>
+          </picker>
+        </view>
+
+        <!-- 知识点输入 -->
+        <view class="edit-section">
+          <text class="section-label">知识点</text>
+          <input
+            class="text-input"
+            value="{{item.aiAnalysis.knowledgePoint}}"
+            bindinput="onKnowledgeInput"
+            data-index="{{index}}"
+            placeholder="输入知识点"
+          />
+        </view>
+
+        <!-- 难度选择 -->
+        <view class="edit-section">
+          <text class="section-label">难度</text>
+          <picker
+            mode="selector"
+            range="{{difficultyList}}"
+            value="{{item.difficultyIndex}}"
+            bindchange="onDifficultyChange"
+            data-id="{{item.id}}"
+            data-itemindex="{{index}}"
+          >
+            <view class="picker-view">
+              <text>{{item.aiAnalysis.difficulty || '请选择难度'}}</text>
+              <text class="picker-arrow">▼</text>
+            </view>
+          </picker>
+        </view>
+
+        <!-- 题型选择 -->
+        <view class="edit-section">
+          <text class="section-label">题型</text>
+          <picker
+            mode="selector"
+            range="{{questionTypeList}}"
+            value="{{item.questionTypeIndex}}"
+            bindchange="onQuestionTypeChange"
+            data-id="{{item.id}}"
+            data-itemindex="{{index}}"
+          >
+            <view class="picker-view">
+              <text>{{item.aiAnalysis.questionType || '请选择题型'}}</text>
+              <text class="picker-arrow">▼</text>
+            </view>
+          </picker>
+        </view>
+
+        <!-- 答案填写区域 -->
+        <view class="answer-section">
+          <text class="section-label">📝 我的答案</text>
+          <textarea
+            class="answer-textarea"
+            value="{{item.userAnswer}}"
+            bindinput="onUserAnswerInput"
+            data-index="{{index}}"
+            placeholder="请填写你的答案"
+            maxlength="-1"
+            auto-height
+            adjust-position="{{false}}"
+          />
+        </view>
+
+        <!-- 正确答案 -->
+        <view class="answer-section">
+          <text class="section-label">✅ 正确答案</text>
+          <textarea
+            class="answer-textarea correct"
+            value="{{item.correctAnswer}}"
+            bindinput="onCorrectAnswerInput"
+            data-index="{{index}}"
+            placeholder="请填写正确答案"
+            maxlength="-1"
+            auto-height
+            adjust-position="{{false}}"
+          />
+        </view>
+
+        <!-- 判对状态 -->
+        <view class="result-section">
+          <text class="section-label">判题结果</text>
+          <view class="result-buttons">
+            <button
+              class="result-btn {{item.isCorrect === true ? 'correct-btn active' : 'correct-btn'}}"
+              bindtap="markAsCorrect"
+              data-index="{{index}}"
+            >
+              ✓ 正确
+            </button>
+            <button
+              class="result-btn {{item.isCorrect === false ? 'wrong-btn active' : 'wrong-btn'}}"
+              bindtap="markAsWrong"
+              data-index="{{index}}"
+            >
+              ✗ 错误
+            </button>
+            <button
+              class="result-btn {{item.isCorrect === null ? 'unknown-btn active' : 'unknown-btn'}}"
+              bindtap="markAsUnknown"
+              data-index="{{index}}"
+            >
+              ? 未判
+            </button>
+          </view>
+        </view>
+
+        <!-- 原图预览 (可折叠) -->
+        <view class="original-preview-section">
+          <view class="preview-header" bindtap="togglePreview" data-index="{{index}}">
+            <text class="preview-label">📷 原图预览</text>
+            <text class="toggle-icon">{{item.showPreview ? '▲' : '▼'}}</text>
+          </view>
+          <view wx:if="{{item.showPreview && item.croppedImage}}" class="preview-content">
+            <image class="preview-img" src="{{item.croppedImage}}" mode="widthFix" />
+          </view>
+        </view>
+
+        <!-- 分隔线 -->
+        <view class="divider"></view>
+      </view>
+    </scroll-view>
+
+    <view class="action-bar">
+      <button class="action-btn secondary" bindtap="backToCropPreview">
+        <text>← 返回</text>
+      </button>
+      <button class="action-btn primary" bindtap="batchSaveQuestions">
+        <text>💾 保存全部 ({{formattedQuestions.length}}题)</text>
+      </button>
+    </view>
+  </view>
+
+  <!-- 隐藏的Canvas用于裁剪 - 使用Canvas 2D API -->
+  <canvas
+    type="2d"
+    id="cropCanvas"
+    style="position: fixed; left: -9999px; top: -9999px; width: 1000px; height: 1000px;"
+  />
 </view>

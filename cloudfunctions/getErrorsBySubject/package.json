@@ -1,0 +1,9 @@
+{
+  "name": "getErrorsBySubject",
+  "version": "1.0.0",
+  "description": "根据学科查询错题列表",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

@@ -6,6 +6,7 @@
   },
   "miniprogramRoot": "miniprogram/",
   "cloudfunctionRoot": "cloudfunctions/",
+  "cloudbaseRoot": "cloudfunctions/",
   "setting": {
     "urlCheck": true,
     "es6": true,
@@ -52,8 +53,8 @@
   "compileType": "miniprogram",
   "libVersion": "latest",
   "projectname": "智能错题整理小程序",
-  "appid": "wx4c9005e8a8ca37c0",
-  "isGameTourist": false,
+  "appid": "wx399122cd0441e5f7",
+  "cloudfunctionTemplateRoot": "cloudfunctions/",
   "condition": {
     "search": {
       "list": []

@@ -17,6 +17,28 @@
     <image wx:if="{{question.imageUrl}}" class="question-image" src="{{question.imageUrl}}" mode="widthFix"></image>
   </view>
 
+  <!-- 答案信息卡片 -->
+  <view wx:if="{{question.userAnswer || question.correctAnswer}}" class="answer-card">
+    <view class="card-title">📝 答案信息</view>
+
+    <view wx:if="{{question.userAnswer}}" class="answer-section">
+      <text class="answer-label">我的答案</text>
+      <text class="answer-value">{{question.userAnswer}}</text>
+    </view>
+
+    <view wx:if="{{question.correctAnswer}}" class="answer-section">
+      <text class="answer-label">正确答案</text>
+      <text class="answer-value correct">{{question.correctAnswer}}</text>
+    </view>
+
+    <view wx:if="{{question.isCorrect !== null}}" class="answer-section">
+      <text class="answer-label">判题结果</text>
+      <view class="result-tag {{question.isCorrect ? 'correct' : 'wrong'}}">
+        {{question.isCorrect ? '✓ 正确' : '✗ 错误'}}
+      </view>
+    </view>
+  </view>
+
   <!-- AI 分析卡片 -->
   <view class="analysis-card">
     <view class="card-title">
@@ -25,23 +47,7 @@
     </view>
 
     <view class="analysis-section">
-      <text class="section-title">错误原因</text>
-      <text class="section-content">{{analysis.errorReason}}</text>
-    </view>
-
-    <view class="analysis-section">
-      <text class="section-title">知识点讲解</text>
-      <text class="section-content">{{analysis.explanation}}</text>
-    </view>
-
-    <view class="analysis-section">
-      <text class="section-title">解题思路</text>
-      <text class="section-content">{{analysis.solution}}</text>
-    </view>
-
-    <view class="analysis-section">
-      <text class="section-title">易错提示</text>
-      <text class="section-content warning">{{analysis.warningTip}}</text>
+      <text class="section-content">{{aiAnalysisText}}</text>
     </view>
   </view>
 
