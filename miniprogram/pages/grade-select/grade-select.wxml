@@ -1,0 +1,70 @@
+<view class="container">
+  <!-- 头部说明 -->
+  <view class="header">
+    <text class="title">{{isFirstTime ? '选择你的年级' : '修改年级'}}</text>
+    <text class="subtitle">{{isFirstTime ? '帮助我们为你提供更好的学习体验' : '选择你当前所在的年级'}}</text>
+  </view>
+
+  <!-- 年级选择区域 -->
+  <view class="grade-sections">
+    <!-- 小学 -->
+    <view class="grade-section">
+      <view class="section-title">小学</view>
+      <view class="grade-grid">
+        <view
+          wx:for="{{primaryGrades}}"
+          wx:key="level"
+          class="grade-item {{selectedGrade && selectedGrade.level === item.level ? 'selected' : ''}}"
+          data-level="{{item.level}}"
+          data-category="{{item.category}}"
+          data-display="{{item.display}}"
+          bindtap="onSelectGrade"
+        >
+          <text class="grade-text">{{item.display}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 初中 -->
+    <view class="grade-section">
+      <view class="section-title">初中</view>
+      <view class="grade-grid">
+        <view
+          wx:for="{{middleGrades}}"
+          wx:key="level"
+          class="grade-item {{selectedGrade && selectedGrade.level === item.level ? 'selected' : ''}}"
+          data-level="{{item.level}}"
+          data-category="{{item.category}}"
+          data-display="{{item.display}}"
+          bindtap="onSelectGrade"
+        >
+          <text class="grade-text">{{item.display}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 高中 -->
+    <view class="grade-section">
+      <view class="section-title">高中</view>
+      <view class="grade-grid">
+        <view
+          wx:for="{{highGrades}}"
+          wx:key="level"
+          class="grade-item {{selectedGrade && selectedGrade.level === item.level ? 'selected' : ''}}"
+          data-level="{{item.level}}"
+          data-category="{{item.category}}"
+          data-display="{{item.display}}"
+          bindtap="onSelectGrade"
+        >
+          <text class="grade-text">{{item.display}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 底部按钮 -->
+  <view class="footer">
+    <button class="confirm-btn" bindtap="onConfirm">确认</button>
+    <button wx:if="{{isFirstTime}}" class="skip-btn" bindtap="onSkip">暂时跳过</button>
+  </view>
+</view>

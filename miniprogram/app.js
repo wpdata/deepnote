@@ -18,7 +18,12 @@ App({
       this.globalData.cloudReady = true;
 
       // 自动微信登录
-      this.wxLogin();
+      this.wxLogin().then(() => {
+        // 登录成功后检查年级设置
+        this.checkGradeSetup();
+      }).catch(err => {
+        console.error('登录失败,跳过年级检查', err);
+      });
     } catch (error) {
       console.error('云开发初始化失败:', error);
       this.globalData.cloudReady = false;
@@ -90,9 +95,43 @@ App({
     return this.globalData.userId || wx.getStorageSync('userId');
   },
 
+  // 检查年级设置
+  checkGradeSetup: async function() {
+    try {
+      // 检查本地缓存
+      const cachedGrade = wx.getStorageSync('userGrade');
+      if (cachedGrade) {
+        console.log('已有年级设置:', cachedGrade);
+        return;
+      }
+
+      // 从云端获取用户信息检查年级
+      const res = await wx.cloud.callFunction({
+        name: 'getUserInfo'
+      });
+
+      if (res.result.success && res.result.data.grade) {
+        // 用户已设置年级,保存到本地
+        wx.setStorageSync('userGrade', res.result.data.grade);
+        console.log('从云端获取年级:', res.result.data.grade);
+      } else {
+        // 首次使用,未设置年级,跳转到年级选择页
+        console.log('首次使用,引导设置年级');
+        setTimeout(() => {
+          wx.reLaunch({
+            url: '/pages/grade-select/grade-select?firstTime=true'
+          });
+        }, 1000);
+      }
+    } catch (error) {
+      console.error('检查年级设置失败:', error);
+    }
+  },
+
   // 退出登录
   logout: function() {
     wx.removeStorageSync('userId');
+    wx.removeStorageSync('userGrade');
     this.globalData.userId = null;
     wx.showToast({
       title: '已退出登录',

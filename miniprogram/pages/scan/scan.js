@@ -8,6 +8,7 @@ Page({
     knowledgePoint: '',
     // 三种模式
     mode: 'upload',  // 'upload' | 'crop_preview' | 'formatted_preview'
+    cameraMode: false,  // 是否显示相机界面
     croppedQuestions: [],
     formattedQuestions: [],
     uploadedFileID: '',
@@ -48,19 +49,212 @@ Page({
     questionTypeList: ['选择题', '填空题', '判断题', '计算题', '应用题', '阅读理解', '完形填空', '作文']
   },
 
-  // 拍照
-  takePhoto() {
-    wx.chooseMedia({
-      count: 1,
-      mediaType: ['image'],
-      sourceType: ['camera'],
-      success: (res) => {
+  // 打开相机
+  openCamera() {
+    // 授权相机权限
+    wx.authorize({
+      scope: 'scope.camera',
+      success: () => {
         this.setData({
-          imageUrl: res.tempFiles[0].tempFilePath
+          cameraMode: true
         })
-        this.startRecognition()
+      },
+      fail: () => {
+        wx.showModal({
+          title: '需要相机权限',
+          content: '请授权相机权限以使用拍照功能',
+          success: (res) => {
+            if (res.confirm) {
+              wx.openSetting()
+            }
+          }
+        })
       }
     })
+  },
+
+  // 退出相机
+  exitCamera() {
+    this.setData({
+      cameraMode: false
+    })
+  },
+
+  // 相机错误处理
+  onCameraError(e) {
+    console.error('相机错误:', e.detail)
+    wx.showToast({
+      title: '相机启动失败',
+      icon: 'none'
+    })
+  },
+
+  // 拍照
+  capturePhoto() {
+    const ctx = wx.createCameraContext()
+    ctx.takePhoto({
+      quality: 'high',
+      success: async (res) => {
+        console.log('拍照成功:', res.tempImagePath)
+
+        wx.showLoading({ title: '处理照片中...' })
+
+        try {
+          // 裁剪出框内的内容
+          const croppedImagePath = await this.cropFrameArea(res.tempImagePath)
+
+          wx.hideLoading()
+
+          this.setData({
+            imageUrl: croppedImagePath,
+            cameraMode: false
+          })
+          this.startRecognition()
+        } catch (error) {
+          wx.hideLoading()
+          console.error('裁剪照片失败:', error)
+          // 如果裁剪失败,使用原图
+          this.setData({
+            imageUrl: res.tempImagePath,
+            cameraMode: false
+          })
+          this.startRecognition()
+        }
+      },
+      fail: (err) => {
+        console.error('拍照失败:', err)
+        wx.showToast({
+          title: '拍照失败，请重试',
+          icon: 'none'
+        })
+      }
+    })
+  },
+
+  // 裁剪取景框区域
+  cropFrameArea(imagePath) {
+    return new Promise(async (resolve, reject) => {
+      try {
+        // 获取屏幕信息
+        const systemInfo = wx.getSystemInfoSync()
+        const screenWidth = systemInfo.windowWidth
+        const screenHeight = systemInfo.windowHeight
+        const dpr = systemInfo.pixelRatio || 2
+
+        console.log('屏幕信息:', { screenWidth, screenHeight, dpr })
+
+        // 获取图片信息
+        const imageInfo = await new Promise((res, rej) => {
+          wx.getImageInfo({
+            src: imagePath,
+            success: res,
+            fail: rej
+          })
+        })
+
+        console.log('原图尺寸:', imageInfo.width, 'x', imageInfo.height)
+
+        // 计算取景框在屏幕上的位置和大小(rpx转px)
+        const frameWidthRpx = 650
+        const frameHeightRpx = 650
+        const frameWidthPx = frameWidthRpx * screenWidth / 750
+        const frameHeightPx = frameHeightRpx * screenWidth / 750
+
+        // 取景框在屏幕中央
+        const frameLeft = (screenWidth - frameWidthPx) / 2
+        const frameTop = (screenHeight - frameHeightPx) / 2
+
+        console.log('取景框屏幕位置(px):', {
+          left: frameLeft,
+          top: frameTop,
+          width: frameWidthPx,
+          height: frameHeightPx
+        })
+
+        // 计算取景框在图片上的位置(根据图片和屏幕的比例)
+        const scaleX = imageInfo.width / screenWidth
+        const scaleY = imageInfo.height / screenHeight
+
+        const cropLeft = frameLeft * scaleX
+        const cropTop = frameTop * scaleY
+        const cropWidth = frameWidthPx * scaleX
+        const cropHeight = frameHeightPx * scaleY
+
+        console.log('裁剪区域(图片坐标):', {
+          x: cropLeft,
+          y: cropTop,
+          width: cropWidth,
+          height: cropHeight
+        })
+
+        // 使用Canvas裁剪
+        const query = wx.createSelectorQuery().in(this)
+        query.select('#cropCanvas')
+          .fields({ node: true, size: true })
+          .exec(async (canvasRes) => {
+            if (!canvasRes || !canvasRes[0] || !canvasRes[0].node) {
+              return reject(new Error('无法获取Canvas节点'))
+            }
+
+            const canvas = canvasRes[0].node
+            const ctx = canvas.getContext('2d')
+
+            // 设置Canvas尺寸为裁剪区域大小
+            canvas.width = cropWidth
+            canvas.height = cropHeight
+
+            // 创建图片对象
+            const img = canvas.createImage()
+
+            img.onload = () => {
+              // 绘制裁剪区域
+              ctx.drawImage(
+                img,
+                cropLeft, cropTop, cropWidth, cropHeight,  // 源图裁剪区域
+                0, 0, cropWidth, cropHeight                // 目标绘制区域
+              )
+
+              // 导出为临时文件
+              setTimeout(() => {
+                wx.canvasToTempFilePath({
+                  canvas: canvas,
+                  x: 0,
+                  y: 0,
+                  width: cropWidth,
+                  height: cropHeight,
+                  destWidth: cropWidth,
+                  destHeight: cropHeight,
+                  fileType: 'jpg',
+                  quality: 0.9,
+                  success: (exportRes) => {
+                    console.log('裁剪成功:', exportRes.tempFilePath)
+                    resolve(exportRes.tempFilePath)
+                  },
+                  fail: (err) => {
+                    console.error('导出Canvas失败:', err)
+                    reject(err)
+                  }
+                }, this)
+              }, 100)
+            }
+
+            img.onerror = (err) => {
+              console.error('加载图片失败:', err)
+              reject(new Error('加载图片失败'))
+            }
+
+            img.src = imagePath
+          })
+      } catch (error) {
+        console.error('裁剪过程出错:', error)
+        reject(error)
+      }
+    })
+  },
+
+  // 原有的takePhoto方法（兼容旧代码）
+  takePhoto() {
+    this.openCamera()
   },
 
   // 从相册选择
@@ -71,7 +265,8 @@ Page({
       sourceType: ['album'],
       success: (res) => {
         this.setData({
-          imageUrl: res.tempFiles[0].tempFilePath
+          imageUrl: res.tempFiles[0].tempFilePath,
+          cameraMode: false
         })
         this.startRecognition()
       }
@@ -138,7 +333,7 @@ Page({
       } else {
         // 没有坐标,降级到整页识别
         console.log('>>> 降级到整页识别模式')
-        await this.fallbackToFullPage(uploadRes.fileID)
+        await this.fallbackToFullPage(uploadRes.fileID, coordRes.result.imageUrl)
       }
 
     } catch (error) {
@@ -624,22 +819,49 @@ Page({
     })
   },
 
-  // 降级到整页识别
-  async fallbackToFullPage(fileID) {
-    wx.showLoading({ title: '识别中...' })
+  // 降级到整页识别（使用智能路由）
+  async fallbackToFullPage(fileID, imageUrl) {
+    wx.showLoading({ title: '智能识别中...' })
 
     try {
-      const ocrRes = await wx.cloud.callFunction({
+      console.log('====== 降级模式：调用智能识别 ======')
+      console.log('fileID:', fileID)
+      console.log('imageUrl:', imageUrl)
+
+      // 使用 recognizeQuestion 模式进行智能识别
+      const recognizeRes = await wx.cloud.callFunction({
         name: 'ocrRecognize',
         data: {
+          action: 'recognizeQuestion',
           fileID: fileID
         }
       })
 
+      console.log('====== 智能识别结果 ======')
+      console.log('完整返回:', JSON.stringify(recognizeRes.result, null, 2))
+      console.log('aiModel:', recognizeRes.result.aiModel)
+      console.log('ocrQuality:', recognizeRes.result.ocrQuality)
+      console.log('===========================')
+
       wx.hideLoading()
 
-      if (ocrRes.result.success) {
-        const aiAnalysis = ocrRes.result.aiAnalysis || {}
+      if (recognizeRes.result.success) {
+        const aiAnalysis = recognizeRes.result.aiAnalysis || {}
+
+        // 获取原图的临时URL（如果没有提供）
+        let displayImageUrl = imageUrl
+        if (!displayImageUrl) {
+          try {
+            const tempUrlRes = await wx.cloud.getTempFileURL({
+              fileList: [fileID]
+            })
+            if (tempUrlRes.fileList && tempUrlRes.fileList.length > 0) {
+              displayImageUrl = tempUrlRes.fileList[0].tempFileURL
+            }
+          } catch (urlError) {
+            console.error('获取临时URL失败:', urlError)
+          }
+        }
 
         this.setData({
           mode: 'formatted_preview',
@@ -647,9 +869,13 @@ Page({
           formattedQuestions: [{
             id: 'q1',
             index: 0,
-            croppedImage: null,
-            formattedText: ocrRes.result.text,
-            rawText: ocrRes.result.text,
+            croppedImage: displayImageUrl,  // 使用原图URL
+            formattedText: recognizeRes.result.formattedText,
+            rawText: recognizeRes.result.rawText,
+            userAnswer: recognizeRes.result.userAnswer || '',
+            correctAnswer: recognizeRes.result.correctAnswer || '',
+            aiModel: recognizeRes.result.aiModel || 'unknown',  // 显示使用的模型
+            ocrQuality: recognizeRes.result.ocrQuality,
             aiAnalysis: aiAnalysis
           }]
         })
@@ -658,11 +884,13 @@ Page({
           title: '识别完成',
           icon: 'success'
         })
+      } else {
+        throw new Error(recognizeRes.result.error || '识别失败')
       }
 
     } catch (error) {
       wx.hideLoading()
-      console.error('整页识别失败:', error)
+      console.error('智能识别失败:', error)
       this.setData({
         recognizing: false
       })
@@ -706,6 +934,7 @@ Page({
   reRecognize() {
     this.setData({
       mode: 'upload',
+      cameraMode: false,
       imageUrl: '',
       recognizing: false,
       croppedQuestions: [],

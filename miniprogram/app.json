@@ -8,7 +8,8 @@
     "pages/error-list/error-list",
     "pages/practice/practice",
     "pages/quick-practice/quick-practice",
-    "pages/profile/profile"
+    "pages/profile/profile",
+    "pages/grade-select/grade-select"
   ],
   "window": {
     "backgroundTextStyle": "light",

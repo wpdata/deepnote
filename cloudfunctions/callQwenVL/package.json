@@ -1,0 +1,9 @@
+{
+  "name": "callQwenVL",
+  "version": "1.0.0",
+  "description": "调用阿里云 Qwen3-VL 视觉模型",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

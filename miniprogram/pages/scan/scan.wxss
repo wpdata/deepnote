@@ -1,14 +1,13 @@
 .container {
   min-height: 100vh;
   background-color: #F5F5F5;
-  padding: 20rpx;
 }
 
 .header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20rpx 0;
+  padding: 20rpx;
   margin-bottom: 20rpx;
 }
 
@@ -16,6 +15,40 @@
   font-size: 40rpx;
   font-weight: 600;
   color: #333;
+}
+
+/* 相机模式顶部标题栏 */
+.camera-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 88rpx;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 30rpx;
+  z-index: 1000;
+}
+
+.camera-title {
+  font-size: 36rpx;
+  font-weight: 600;
+  color: #fff;
+}
+
+.config-btn-small {
+  width: 64rpx;
+  height: 64rpx;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  border: none;
+  font-size: 36rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(10rpx);
 }
 
 .config-btn {
@@ -30,13 +63,40 @@
   gap: 8rpx;
 }
 
+/* OCR配置面板覆盖层 */
+.config-panel-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  padding: 40rpx;
+}
+
 /* OCR配置面板 */
 .config-panel {
   background: #fff;
   border-radius: 16rpx;
   padding: 30rpx;
-  margin-bottom: 30rpx;
-  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.08);
+  width: 100%;
+  max-width: 600rpx;
+  box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.2);
+}
+
+.config-close-btn {
+  width: 100%;
+  height: 80rpx;
+  background: #1677FF;
+  color: #fff;
+  font-size: 28rpx;
+  border-radius: 12rpx;
+  margin-top: 24rpx;
+  border: none;
 }
 
 .config-title {
@@ -86,10 +146,277 @@
 
 /* 上传区域 */
 .upload-section {
+  min-height: 100vh;
+}
+
+/* ============ 相机模式样式 ============ */
+.camera-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: #000;
+}
+
+.camera-view {
+  width: 100%;
+  height: 100%;
+}
+
+/* 取景框遮罩层 */
+.camera-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+}
+
+/* 上方遮罩 */
+.overlay-top {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: calc((100% - 650rpx) / 2);
+  background: rgba(0, 0, 0, 0.6);
+}
+
+/* 中间行 */
+.overlay-middle {
+  position: absolute;
+  top: calc((100% - 650rpx) / 2);
+  left: 0;
+  right: 0;
+  height: 650rpx;
+  display: flex;
+  flex-direction: row;
+}
+
+.overlay-left,
+.overlay-right {
+  width: 50rpx;
+  background: rgba(0, 0, 0, 0.6);
+}
+
+/* 取景框 */
+.frame-box {
+  width: 650rpx;
+  height: 650rpx;
+  position: relative;
+  border: 3rpx solid rgba(255, 255, 255, 0.5);
+}
+
+/* 四个角的L形引导线 */
+.corner-line {
+  position: absolute;
+  background: #1677FF;
+  box-shadow: 0 0 10rpx rgba(22, 119, 255, 0.8);
+}
+
+.corner-line::before,
+.corner-line::after {
+  content: '';
+  position: absolute;
+  background: #1677FF;
+  box-shadow: 0 0 10rpx rgba(22, 119, 255, 0.8);
+}
+
+/* 左上角 */
+.top-left {
+  top: -3rpx;
+  left: -3rpx;
+  width: 80rpx;
+  height: 6rpx;
+  border-radius: 3rpx 0 0 0;
+}
+
+.top-left::after {
+  top: 0;
+  left: 0;
+  width: 6rpx;
+  height: 80rpx;
+  border-radius: 3rpx 0 0 0;
+}
+
+/* 右上角 */
+.top-right {
+  top: -3rpx;
+  right: -3rpx;
+  width: 80rpx;
+  height: 6rpx;
+  border-radius: 0 3rpx 0 0;
+}
+
+.top-right::after {
+  top: 0;
+  right: 0;
+  width: 6rpx;
+  height: 80rpx;
+  border-radius: 0 3rpx 0 0;
+}
+
+/* 左下角 */
+.bottom-left {
+  bottom: -3rpx;
+  left: -3rpx;
+  width: 80rpx;
+  height: 6rpx;
+  border-radius: 0 0 0 3rpx;
+}
+
+.bottom-left::after {
+  bottom: 0;
+  left: 0;
+  width: 6rpx;
+  height: 80rpx;
+  border-radius: 0 0 0 3rpx;
+}
+
+/* 右下角 */
+.bottom-right {
+  bottom: -3rpx;
+  right: -3rpx;
+  width: 80rpx;
+  height: 6rpx;
+  border-radius: 0 0 3rpx 0;
+}
+
+.bottom-right::after {
+  bottom: 0;
+  right: 0;
+  width: 6rpx;
+  height: 80rpx;
+  border-radius: 0 0 3rpx 0;
+}
+
+/* 取景框提示文字 */
+.frame-hint {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(22, 119, 255, 0.9);
+  padding: 16rpx 32rpx;
+  border-radius: 40rpx;
+  backdrop-filter: blur(10rpx);
+}
+
+.hint-text {
+  color: #fff;
+  font-size: 26rpx;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+/* 下方遮罩 */
+.overlay-bottom {
+  position: absolute;
+  top: calc((100% - 650rpx) / 2 + 650rpx);
+  left: 0;
+  right: 0;
+  bottom: 260rpx;
+  background: rgba(0, 0, 0, 0.6);
+}
+
+/* 相机控制栏 */
+.camera-controls {
+  position: absolute;
+  bottom: 80rpx;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  pointer-events: auto;
+  z-index: 100;
+}
+
+.control-item {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding-top: 100rpx;
+  gap: 12rpx;
+  pointer-events: auto;
+  margin: 0 60rpx;
+}
+
+.control-icon {
+  width: 80rpx;
+  height: 80rpx;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 40rpx;
+  backdrop-filter: blur(10rpx);
+  border: 2rpx solid rgba(255, 255, 255, 0.3);
+  line-height: 80rpx;
+  text-align: center;
+}
+
+.control-label {
+  font-size: 22rpx;
+  color: #fff;
+  opacity: 0.9;
+  line-height: 1;
+}
+
+/* 拍照按钮 */
+.control-item.capture {
+  transform: scale(1.2);
+}
+
+.capture-button {
+  width: 120rpx;
+  height: 120rpx;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 6rpx solid #fff;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.4);
+}
+
+.capture-inner {
+  width: 100rpx;
+  height: 100rpx;
+  background: #fff;
+  border-radius: 50%;
+}
+
+/* 拍照提示覆盖层 */
+.photo-tips-overlay {
+  position: absolute;
+  top: 120rpx;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(22, 119, 255, 0.9);
+  padding: 16rpx 32rpx;
+  border-radius: 40rpx;
+  backdrop-filter: blur(10rpx);
+  max-width: 80%;
+  pointer-events: auto;
+}
+
+.tip-text {
+  color: #fff;
+  font-size: 24rpx;
+  line-height: 1.5;
+  text-align: center;
+  display: block;
+}
+
+/* 初始上传区域容器 */
+.upload-area-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 100rpx 20rpx 20rpx;
 }
 
 .upload-area {
@@ -665,6 +992,11 @@
 .model-general {
   background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
   box-shadow: 0 2rpx 8rpx rgba(79, 172, 254, 0.3);
+}
+
+.model-vision {
+  background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+  box-shadow: 0 2rpx 8rpx rgba(168, 237, 234, 0.3);
 }
 
 .edit-section {

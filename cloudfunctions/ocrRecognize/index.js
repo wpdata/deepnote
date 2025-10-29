@@ -373,12 +373,51 @@ async function recognizeAndFormatQuestion(imageData, fileID) {
       }
     }
 
-    // Step 4: 使用AI处理OCR文本
-    console.log('步骤4: 使用AI处理文本...')
+    // Step 4: 评估OCR质量
+    console.log('步骤4: 评估OCR质量...')
+    const ocrQuality = evaluateOCRQuality(rawText)
+    console.log('OCR质量评估:', ocrQuality)
 
     // 先初步判断学科
     const preliminarySubject = detectSubject(rawText)
     console.log('初步学科判断:', preliminarySubject)
+
+    // 判断是否需要使用VL模型
+    const needsVisionModel = shouldUseVisionModel(rawText, ocrQuality, preliminarySubject)
+    console.log('是否需要VL模型:', needsVisionModel)
+
+    // 如果需要VL模型，调用视觉分析
+    if (needsVisionModel) {
+      console.log('检测到需要视觉模型，调用 Qwen3-VL 进行图片分析')
+      try {
+        const visionResult = await analyzeWithQwenVL(imageUrl, rawText, preliminarySubject)
+        if (visionResult) {
+          return {
+            success: true,
+            rawText: rawText,
+            formattedText: visionResult.formattedText || rawText,
+            userAnswer: visionResult.userAnswer || '',
+            correctAnswer: visionResult.correctAnswer || '',
+            mathCalculated: false,
+            aiModel: 'qwen-vl-max',  // 标识使用VL模型
+            ocrQuality: ocrQuality,
+            aiAnalysis: {
+              subject: visionResult.subject || '未分类',
+              knowledgePoint: visionResult.knowledgePoint || '待标注',
+              difficulty: visionResult.difficulty || '中等',
+              questionType: visionResult.questionType || '未知',
+              analysis: visionResult.aiAnalysis || ''
+            }
+          }
+        }
+      } catch (visionError) {
+        console.error('VL模型调用失败，降级到标准流程:', visionError)
+        // 继续使用标准流程
+      }
+    }
+
+    // Step 5: 使用AI处理OCR文本（标准流程）
+    console.log('步骤5: 使用AI处理文本...')
 
     // 如果是数学题，直接使用通义千问完整分析
     if (preliminarySubject === '数学') {
@@ -584,6 +623,7 @@ ${rawText}
       correctAnswer: result.correctAnswer || '',
       mathCalculated: preliminarySubject === '数学',  // 标记是否是数学题
       aiModel: preliminarySubject === '数学' ? 'qwen-math-turbo' : 'deepseek-chat',  // 标识使用的模型
+      ocrQuality: ocrQuality,  // OCR质量评估结果
       aiAnalysis: {
         subject: result.subject || '未分类',
         knowledgePoint: result.knowledgePoint || '待标注',
@@ -1332,5 +1372,151 @@ function parseOralCalculationResult(data) {
     wrongCount,
     score,
     wrongItems
+  }
+}
+
+/**
+ * 评估OCR识别质量
+ */
+function evaluateOCRQuality(text) {
+  if (!text || text.trim().length === 0) {
+    return 'none'
+  }
+
+  const length = text.length
+
+  // 检查是否有乱码或特殊字符
+  const hasGarbage = /[���?]{3,}/.test(text)
+  const hasIncompleteChars = /\?{2,}/.test(text)
+
+  // 检查是否有明显的OCR错误（如 "了个气"、断句、多余空格等）
+  const hasOCRErrors = /[了个气]{3}|[\u4e00-\u9fa5]\s[\u4e00-\u9fa5]/.test(text)
+
+  // 检查是否有不完整的词（如 "大小相 大小相同"）
+  const hasIncompleteWords = /(\S+)\s\1/.test(text)
+
+  // 检查是否有意义的词汇
+  const meaningfulWords = text.match(/[\u4e00-\u9fa5a-zA-Z]{2,}/g) || []
+  const meaningfulRatio = meaningfulWords.join('').length / length
+
+  // 更严格的判断条件
+  if (hasGarbage || hasIncompleteChars || hasOCRErrors || hasIncompleteWords) {
+    console.log('OCR质量低: 检测到乱码或错误')
+    return 'low'
+  }
+
+  if (length < 15) {
+    console.log('OCR质量低: 文本过短')
+    return 'low'
+  }
+
+  if (meaningfulRatio > 0.7 && length > 30) {
+    console.log('OCR质量高: 文本清晰完整')
+    return 'high'
+  }
+
+  if (meaningfulRatio > 0.5) {
+    console.log('OCR质量中等: 文本基本可读')
+    return 'medium'
+  }
+
+  console.log('OCR质量低: 有效字符比例不足')
+  return 'low'
+}
+
+/**
+ * 判断是否应该使用视觉模型
+ */
+function shouldUseVisionModel(text, ocrQuality, subject) {
+  // 1. OCR质量很差，无法识别
+  if (ocrQuality === 'low' || ocrQuality === 'none') {
+    return true
+  }
+
+  // 2. 包含几何、图形相关关键词
+  if (/几何|图形|作图|画图|连线|匹配|配对|如图|下图|右图/.test(text)) {
+    return true
+  }
+
+  // 3. 数学题且OCR质量不高
+  if (subject === '数学' && ocrQuality === 'medium') {
+    // 检查是否包含图形相关内容
+    if (/图|线段|角|三角形|四边形|圆/.test(text)) {
+      return true
+    }
+  }
+
+  return false
+}
+
+/**
+ * 使用 Qwen3-VL 进行图片分析
+ */
+async function analyzeWithQwenVL(imageUrl, ocrText, subject) {
+  try {
+    const prompt = `你是一位专业的${subject}老师。
+
+请仔细分析这道题目:
+${ocrText ? 'OCR识别文字(可能不完整): ' + ocrText : ''}
+
+请根据图片完整分析这道题，并返回以下JSON格式:
+{
+  "formattedText": "完整的题目内容（50-200字）",
+  "subject": "学科（数学/语文/英语/物理/化学/生物）",
+  "knowledgePoint": "具体知识点名称",
+  "difficulty": "难度（简单/中等/困难）",
+  "questionType": "题型（选择题/填空题/解答题/应用题/计算题等）",
+  "userAnswer": "学生答案（如果图片中有手写答案）",
+  "correctAnswer": "标准答案或正确解法",
+  "aiAnalysis": "详细的解题分析和易错点提示（100-200字）"
+}
+
+注意：
+1. formattedText 要完整描述题目，包括图形信息
+2. 如果能从图片中识别学生的手写答案，填入 userAnswer
+3. correctAnswer 要给出详细的解题步骤
+4. aiAnalysis 要针对这道具体题目，不要使用模板化语言`
+
+    const result = await cloud.callFunction({
+      name: 'callQwenVL',
+      data: {
+        imageUrl: imageUrl,
+        prompt: prompt,
+        model: 'qwen-vl-max'
+      }
+    })
+
+    if (result.result && result.result.success) {
+      let content = result.result.content
+      console.log('Qwen3-VL 返回内容:', content)
+
+      // 处理数组格式的返回
+      if (Array.isArray(content) && content.length > 0) {
+        content = content[0].text || content[0]
+        console.log('提取数组第一项:', content)
+      }
+
+      // 解析JSON
+      try {
+        // 移除 markdown 代码块标记
+        let jsonText = content.replace(/```json\n/g, '').replace(/```/g, '').trim()
+
+        // 提取 JSON 对象
+        const jsonMatch = jsonText.match(/\{[\s\S]*\}/)
+        if (jsonMatch) {
+          const parsed = JSON.parse(jsonMatch[0])
+          console.log('成功解析VL模型返回的JSON')
+          return parsed
+        }
+      } catch (parseError) {
+        console.error('解析VL模型返回的JSON失败:', parseError)
+        console.error('原始内容:', content)
+      }
+    }
+
+    return null
+  } catch (error) {
+    console.error('调用 Qwen3-VL 失败:', error)
+    return null
   }
 }

@@ -19,7 +19,11 @@
         />
         <text wx:else class="username" bindtap="onEditNickname">{{userInfo.nickName || '点击设置昵称'}}</text>
       </view>
-      <text class="study-days">已学习 {{userInfo.studyDays}} 天</text>
+      <view class="user-meta">
+        <text class="study-days">已学习 {{userInfo.studyDays}} 天</text>
+        <text wx:if="{{userInfo.grade}}" class="grade-tag">{{userInfo.grade.displayName}}</text>
+        <text wx:else class="grade-tag unset" bindtap="onChangeGrade">点击设置年级</text>
+      </view>
     </view>
   </view>
 
@@ -54,6 +58,17 @@
 
   <!-- 功能菜单 -->
   <view class="menu-section">
+    <view class="menu-item" bindtap="onChangeGrade">
+      <view class="menu-left">
+        <text class="menu-icon">🎓</text>
+        <text class="menu-title">年级设置</text>
+      </view>
+      <view class="menu-right">
+        <text class="menu-value">{{userInfo.grade ? userInfo.grade.displayName : '未设置'}}</text>
+        <text class="arrow-icon">›</text>
+      </view>
+    </view>
+
     <view class="menu-item" bindtap="onBackupData">
       <view class="menu-left">
         <text class="menu-icon">☁️</text>

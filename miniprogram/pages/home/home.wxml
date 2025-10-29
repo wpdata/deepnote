@@ -1,10 +1,4 @@
 <scroll-view class="container" scroll-y="true" refresher-enabled="{{true}}" refresher-triggered="{{refreshing}}" bindrefresherrefresh="onPullDownRefresh" enable-back-to-top="{{true}}">
-  <!-- 顶部栏 -->
-  <view class="header">
-    <text class="title">首页</text>
-    <text class="settings-icon" bindtap="onSettings">⚙️</text>
-  </view>
-
   <!-- 统计卡片区域 -->
   <view class="stats-section">
     <view class="stat-card">

@@ -1,0 +1,120 @@
+.container {
+  min-height: 100vh;
+  background: linear-gradient(180deg, #f5f7fa 0%, #ffffff 100%);
+  padding: 40rpx 32rpx;
+}
+
+/* 头部 */
+.header {
+  text-align: center;
+  margin-bottom: 60rpx;
+}
+
+.title {
+  display: block;
+  font-size: 48rpx;
+  font-weight: bold;
+  color: #1a1a1a;
+  margin-bottom: 16rpx;
+}
+
+.subtitle {
+  display: block;
+  font-size: 28rpx;
+  color: #8a8a8a;
+}
+
+/* 年级选择区域 */
+.grade-sections {
+  margin-bottom: 40rpx;
+}
+
+.grade-section {
+  margin-bottom: 48rpx;
+}
+
+.section-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-bottom: 24rpx;
+  padding-left: 8rpx;
+}
+
+.grade-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24rpx;
+}
+
+.grade-item {
+  background: #ffffff;
+  border: 2rpx solid #e8e8e8;
+  border-radius: 16rpx;
+  padding: 32rpx 24rpx;
+  text-align: center;
+  transition: all 0.3s ease;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.04);
+}
+
+.grade-item.selected {
+  background: linear-gradient(135deg, #1677FF 0%, #0052D9 100%);
+  border-color: #1677FF;
+  box-shadow: 0 4rpx 16rpx rgba(22, 119, 255, 0.3);
+  transform: translateY(-4rpx);
+}
+
+.grade-text {
+  font-size: 28rpx;
+  color: #1a1a1a;
+  font-weight: 500;
+}
+
+.grade-item.selected .grade-text {
+  color: #ffffff;
+  font-weight: 600;
+}
+
+/* 底部按钮 */
+.footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 24rpx 32rpx;
+  padding-bottom: calc(24rpx + env(safe-area-inset-bottom));
+  background: #ffffff;
+  box-shadow: 0 -2rpx 12rpx rgba(0, 0, 0, 0.08);
+}
+
+.confirm-btn {
+  width: 100%;
+  height: 88rpx;
+  background: linear-gradient(135deg, #1677FF 0%, #0052D9 100%);
+  color: #ffffff;
+  border: none;
+  border-radius: 16rpx;
+  font-size: 32rpx;
+  font-weight: 600;
+  margin-bottom: 16rpx;
+  box-shadow: 0 4rpx 16rpx rgba(22, 119, 255, 0.3);
+}
+
+.confirm-btn:active {
+  opacity: 0.9;
+  transform: translateY(2rpx);
+}
+
+.skip-btn {
+  width: 100%;
+  height: 88rpx;
+  background: transparent;
+  color: #8a8a8a;
+  border: 2rpx solid #e8e8e8;
+  border-radius: 16rpx;
+  font-size: 28rpx;
+}
+
+.skip-btn:active {
+  background: #f5f7fa;
+}

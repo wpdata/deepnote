@@ -141,13 +141,6 @@ Page({
     })
   },
 
-  onSettings() {
-    wx.showToast({
-      title: '设置功能开发中',
-      icon: 'none'
-    })
-  },
-
   // 跳转到口算检查页面
   goToMathCheck() {
     wx.navigateTo({

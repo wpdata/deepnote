@@ -4,28 +4,6 @@
   height: 100vh;
 }
 
-/* 顶部栏 */
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 20rpx 0;
-  background-color: #FFFFFF;
-  margin: -20rpx -20rpx 20rpx -20rpx;
-  padding: 20rpx;
-}
-
-.title {
-  font-size: 36rpx;
-  font-weight: 600;
-  color: #333;
-}
-
-.settings-icon {
-  font-size: 48rpx;
-  line-height: 1;
-}
-
 /* 统计卡片区域 */
 .stats-section {
   display: flex;

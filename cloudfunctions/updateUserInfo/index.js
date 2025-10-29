@@ -40,6 +40,10 @@ exports.main = async (event, context) => {
       updateData.avatarUrl = event.avatarUrl;
     }
 
+    if (event.grade !== undefined) {
+      updateData.grade = event.grade;
+    }
+
     // 更新用户信息
     await db.collection('users').doc(userId).update({
       data: updateData

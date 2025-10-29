@@ -34,6 +34,7 @@ exports.main = async (event, context) => {
         nickName: user.nickName || '智能错题本用户',
         avatarUrl: user.avatarUrl || '',
         role: user.role || 'user',
+        grade: user.grade || null,
         createTime: user.createTime,
         updateTime: user.updateTime
       }

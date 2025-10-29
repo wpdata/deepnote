@@ -3,7 +3,8 @@ Page({
     userInfo: {
       avatarUrl: '',
       nickName: '智能错题本用户',
-      studyDays: 15
+      studyDays: 15,
+      grade: null // 年级信息
     },
     stats: {
       totalErrors: 120,
@@ -39,7 +40,8 @@ Page({
         const userInfo = {
           avatarUrl: res.result.data.avatarUrl || '',
           nickName: res.result.data.nickName || '智能错题本用户',
-          studyDays: this.data.userInfo.studyDays
+          studyDays: this.data.userInfo.studyDays,
+          grade: res.result.data.grade || null
         };
 
         this.setData({ userInfo });
@@ -233,6 +235,13 @@ Page({
           icon: 'none'
         })
       }
+    })
+  },
+
+  // 修改年级
+  onChangeGrade() {
+    wx.navigateTo({
+      url: '/pages/grade-select/grade-select?firstTime=false'
     })
   },
 
