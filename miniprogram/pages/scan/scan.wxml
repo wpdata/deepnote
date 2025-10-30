@@ -4,43 +4,6 @@
     <!-- 顶部标题栏 -->
     <view class="camera-header">
       <text class="camera-title">拍题识别</text>
-      <button class="config-btn-small" bindtap="toggleConfig">
-        ⚙️
-      </button>
-    </view>
-
-    <!-- OCR配置面板 -->
-    <view wx:if="{{showConfig}}" class="config-panel-overlay">
-      <view class="config-panel">
-        <view class="config-title">识别设置</view>
-
-        <view class="config-item">
-          <text class="config-label">切割方式</text>
-          <picker mode="selector" range="{{cutTypeOptions}}" value="{{cutTypeIndex}}" bindchange="onCutTypeChange">
-            <view class="config-value">{{cutTypeOptions[cutTypeIndex]}} ▼</view>
-          </picker>
-        </view>
-
-        <view class="config-item">
-          <text class="config-label">图片类型</text>
-          <picker mode="selector" range="{{imageTypeOptions}}" value="{{imageTypeIndex}}" bindchange="onImageTypeChange">
-            <view class="config-value">{{imageTypeOptions[imageTypeIndex]}} ▼</view>
-          </picker>
-        </view>
-
-        <view class="config-item">
-          <text class="config-label">学科类型</text>
-          <picker mode="selector" range="{{subjectOptions}}" value="{{subjectSelectIndex}}" bindchange="onSubjectSelectChange">
-            <view class="config-value">{{subjectOptions[subjectSelectIndex]}} ▼</view>
-          </picker>
-        </view>
-
-        <view class="config-tip">
-          💡 提示: 准确的设置可以提高识别准确率
-        </view>
-
-        <button class="config-close-btn" bindtap="toggleConfig">关闭</button>
-      </view>
     </view>
 
     <!-- 识别中 -->
@@ -122,8 +85,57 @@
     <view wx:else class="upload-area-container">
       <view class="upload-area" bindtap="openCamera">
         <text class="upload-icon">📷</text>
-        <text class="upload-text">点击拍照识别</text>
-        <text class="upload-hint">支持 JPG、PNG 格式</text>
+        <text class="upload-text">点击进入拍照识别</text>
+        <text class="upload-hint">可拍照或从相册选择</text>
+      </view>
+
+      <!-- 识别设置 -->
+      <view class="settings-section">
+        <view class="settings-title">⚙️ 识别设置</view>
+
+        <view class="setting-item">
+          <view class="setting-label">
+            <text class="label-icon">✂️</text>
+            <text class="label-text">切割方式</text>
+          </view>
+          <picker mode="selector" range="{{cutTypeOptions}}" value="{{cutTypeIndex}}" bindchange="onCutTypeChange">
+            <view class="setting-value">
+              <text>{{cutTypeOptions[cutTypeIndex]}}</text>
+              <text class="arrow">›</text>
+            </view>
+          </picker>
+        </view>
+
+        <view class="setting-item">
+          <view class="setting-label">
+            <text class="label-icon">📷</text>
+            <text class="label-text">图片类型</text>
+          </view>
+          <picker mode="selector" range="{{imageTypeOptions}}" value="{{imageTypeIndex}}" bindchange="onImageTypeChange">
+            <view class="setting-value">
+              <text>{{imageTypeOptions[imageTypeIndex]}}</text>
+              <text class="arrow">›</text>
+            </view>
+          </picker>
+        </view>
+
+        <view class="setting-item">
+          <view class="setting-label">
+            <text class="label-icon">📚</text>
+            <text class="label-text">学科类型</text>
+          </view>
+          <picker mode="selector" range="{{subjectOptions}}" value="{{subjectSelectIndex}}" bindchange="onSubjectSelectChange">
+            <view class="setting-value">
+              <text>{{subjectOptions[subjectSelectIndex]}}</text>
+              <text class="arrow">›</text>
+            </view>
+          </picker>
+        </view>
+
+        <view class="settings-tip">
+          <text class="tip-icon">💡</text>
+          <text class="tip-text">准确的设置可以提高识别准确率</text>
+        </view>
       </view>
 
       <!-- 拍照技巧提示 -->
@@ -135,17 +147,6 @@
           <text class="tip-item">• 尽量平铺拍摄，减少倾斜角度</text>
           <text class="tip-item">• 如包含学生答案，请用圆圈或勾选标记</text>
         </view>
-      </view>
-
-      <view class="action-buttons">
-        <button class="action-btn primary" bindtap="openCamera">
-          <text class="btn-icon">📷</text>
-          拍照识别
-        </button>
-        <button class="action-btn secondary" bindtap="chooseFromAlbum">
-          <text class="btn-icon">🖼️</text>
-          从相册选择
-        </button>
       </view>
     </view>
   </view>

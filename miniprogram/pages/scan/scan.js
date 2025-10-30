@@ -719,7 +719,7 @@ Page({
           const questionData = {
             id: question.id,
             index: i,
-            croppedImage: question.croppedImage,
+            croppedImage: uploadRes.fileID,  // 使用上传后的fileID而不是本地临时路径
             formattedText: recognizeRes.result.formattedText || '',
             rawText: recognizeRes.result.rawText || '',
             aiAnalysis: {
@@ -848,20 +848,8 @@ Page({
       if (recognizeRes.result.success) {
         const aiAnalysis = recognizeRes.result.aiAnalysis || {}
 
-        // 获取原图的临时URL（如果没有提供）
-        let displayImageUrl = imageUrl
-        if (!displayImageUrl) {
-          try {
-            const tempUrlRes = await wx.cloud.getTempFileURL({
-              fileList: [fileID]
-            })
-            if (tempUrlRes.fileList && tempUrlRes.fileList.length > 0) {
-              displayImageUrl = tempUrlRes.fileList[0].tempFileURL
-            }
-          } catch (urlError) {
-            console.error('获取临时URL失败:', urlError)
-          }
-        }
+        // 直接使用 fileID,小程序会自动处理 cloud:// 格式
+        const displayImageUrl = fileID
 
         this.setData({
           mode: 'formatted_preview',
@@ -869,7 +857,7 @@ Page({
           formattedQuestions: [{
             id: 'q1',
             index: 0,
-            croppedImage: displayImageUrl,  // 使用原图URL
+            croppedImage: displayImageUrl,  // 使用fileID
             formattedText: recognizeRes.result.formattedText,
             rawText: recognizeRes.result.rawText,
             userAnswer: recognizeRes.result.userAnswer || '',
@@ -1115,7 +1103,7 @@ Page({
           // 学科名称到ID的映射
           const subjectMap = {
             '数学': 'math',
-            '算数': 'arithmetic',
+            '算术': 'arithmetic',
             '语文': 'chinese',
             '英语': 'english'
           }
@@ -1136,10 +1124,15 @@ Page({
           })
         }
 
-        this.reRecognize()
         console.log('准备跳转到错题本页面')
         wx.switchTab({
-          url: '/pages/errorbook/errorbook'
+          url: '/pages/errorbook/errorbook',
+          success: () => {
+            // 跳转成功后再清空数据
+            setTimeout(() => {
+              this.reRecognize()
+            }, 300)
+          }
         })
       }, 1500)
     } else {
@@ -1155,6 +1148,11 @@ Page({
     this.setData({
       showConfig: !this.data.showConfig
     })
+  },
+
+  // 阻止事件冒泡
+  stopPropagation() {
+    // 空函数，用于阻止点击面板内容时关闭面板
   },
 
   // 切割类型选择

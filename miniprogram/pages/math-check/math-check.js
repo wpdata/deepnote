@@ -62,7 +62,7 @@ Page({
         uploadedFileID: uploadRes.fileID
       })
 
-      // 2. 调用算数检查云函数
+      // 2. 调用算术检查云函数
       const checkRes = await wx.cloud.callFunction({
         name: 'ocrRecognize',
         data: {
@@ -71,7 +71,7 @@ Page({
         }
       })
 
-      console.log('====== 算数检查结果 ======')
+      console.log('====== 算术检查结果 ======')
       console.log(JSON.stringify(checkRes.result, null, 2))
       console.log('========================')
 
@@ -99,7 +99,7 @@ Page({
       }
 
     } catch (error) {
-      console.error('算数检查失败:', error)
+      console.error('算术检查失败:', error)
       wx.hideLoading()
       wx.showToast({
         title: error.message || '检查失败',
@@ -145,15 +145,15 @@ Page({
           data: {
             mode: 'add',
             content: item.expression,
-            subject: '算数',
+            subject: '算术',
             knowledgePoint: this.getKnowledgePoint(item.expression),
             imageUrl: this.data.uploadedFileID,
             difficulty: '简单',
-            questionType: '算数题',
+            questionType: '算术题',
             userAnswer: item.userAnswer,
             correctAnswer: item.correctAnswer,
             isCorrect: false,
-            aiAnalysisText: `这道${this.getOperationType(item.expression)}算数题答案错误。正确答案是${item.correctAnswer}，你的答案是${item.userAnswer}。建议加强${this.getKnowledgePoint(item.expression)}的练习。`
+            aiAnalysisText: `这道${this.getOperationType(item.expression)}算术题答案错误。正确答案是${item.correctAnswer}，你的答案是${item.userAnswer}。建议加强${this.getKnowledgePoint(item.expression)}的练习。`
           }
         })
 
@@ -208,6 +208,6 @@ Page({
     if (expression.includes('-')) return '减法'
     if (expression.includes('×') || expression.includes('*')) return '乘法'
     if (expression.includes('÷') || expression.includes('/')) return '除法'
-    return '算数'
+    return '算术'
   }
 })

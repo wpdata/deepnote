@@ -14,7 +14,7 @@ exports.main = async (event, context) => {
   try {
     // 查询用户信息
     const userQuery = await db.collection('users').where({
-      openId: openId
+      _openid: openId
     }).get();
 
     if (userQuery.data.length === 0) {
@@ -30,7 +30,7 @@ exports.main = async (event, context) => {
       success: true,
       data: {
         userId: user._id,
-        openId: user.openId,
+        openId: user._openid,
         nickName: user.nickName || '智能错题本用户',
         avatarUrl: user.avatarUrl || '',
         role: user.role || 'user',

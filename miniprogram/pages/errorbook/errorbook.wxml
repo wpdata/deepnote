@@ -1,4 +1,4 @@
-<scroll-view class="container" scroll-y="true" refresher-enabled="{{true}}" refresher-triggered="{{refreshing}}" bindrefresherrefresh="onPullDownRefresh" enable-back-to-top="{{true}}">
+<scroll-view class="container" scroll-y="true" refresher-enabled="{{true}}" refresher-triggered="{{refreshing}}" bindrefresherrefresh="onPullDownRefresh" bindscrolltolower="loadMore" lower-threshold="100" enable-back-to-top="{{true}}">
   <!-- 顶部统计信息 -->
   <view class="stats-header">
     <view class="stat-item">
@@ -15,86 +15,100 @@
     </view>
   </view>
 
-  <!-- 切换标签 -->
-  <view class="tabs">
-    <view
-      class="tab {{currentTab === 'subject' ? 'active' : ''}}"
-      bindtap="switchTab"
-      data-tab="subject"
-    >
-      <text>学科</text>
-    </view>
-    <view
-      class="tab {{currentTab === 'knowledge' ? 'active' : ''}}"
-      bindtap="switchTab"
-      data-tab="knowledge"
-    >
-      <text>知识点</text>
-    </view>
+  <!-- 学科标签 -->
+  <view class="subject-tabs">
+    <scroll-view scroll-x class="subject-scroll">
+      <view
+        class="subject-tag {{currentSubject === item.id ? 'active' : ''}}"
+        wx:for="{{subjects}}"
+        wx:key="id"
+        bindtap="selectSubject"
+        data-id="{{item.id}}"
+      >
+        {{item.name}}
+      </view>
+    </scroll-view>
   </view>
 
-  <!-- 学科视图 -->
-  <view class="content" wx:if="{{currentTab === 'subject'}}">
-    <view class="subject-tabs">
-      <scroll-view scroll-x class="subject-scroll">
-        <view
-          class="subject-tag {{currentSubject === item.id ? 'active' : ''}}"
-          wx:for="{{subjects}}"
-          wx:key="id"
-          bindtap="selectSubject"
-          data-id="{{item.id}}"
-        >
-          {{item.name}}
-        </view>
-      </scroll-view>
-    </view>
-
-    <view class="knowledge-list">
+  <!-- 筛选栏 -->
+  <view class="filter-bar">
+    <scroll-view scroll-x class="filter-scroll">
       <view
-        class="knowledge-item"
-        wx:for="{{knowledgeList}}"
-        wx:key="id"
-        bindtap="goToDetail"
-        data-id="{{item.id}}"
-        data-name="{{item.name}}"
+        class="filter-tag {{currentFilter === '' ? 'active' : ''}}"
+        bindtap="selectFilter"
+        data-filter=""
       >
-        <view class="knowledge-info">
-          <text class="knowledge-name">{{item.name}}</text>
-          <text class="error-count">{{item.errorCount}} 道错题</text>
-        </view>
-        <view class="progress-info">
-          <view class="progress-bar-bg">
-            <view class="progress-bar-fill" style="width: {{item.masteredRate}}%"></view>
-          </view>
-          <text class="progress-text">{{item.masteredRate}}%</text>
-        </view>
+        全部
       </view>
-    </view>
+      <view
+        class="filter-tag {{currentFilter === 'favorited' ? 'active' : ''}}"
+        bindtap="selectFilter"
+        data-filter="favorited"
+      >
+        ★ 已收藏
+      </view>
+      <view
+        class="filter-tag {{currentFilter === 'mastered' ? 'active' : ''}}"
+        bindtap="selectFilter"
+        data-filter="mastered"
+      >
+        ✓ 已掌握
+      </view>
+      <view
+        class="filter-tag {{currentFilter === 'unmastered' ? 'active' : ''}}"
+        bindtap="selectFilter"
+        data-filter="unmastered"
+      >
+        ✗ 未掌握
+      </view>
+    </scroll-view>
   </view>
 
-  <!-- 知识点视图 -->
-  <view class="content" wx:if="{{currentTab === 'knowledge'}}">
-    <view class="knowledge-list">
-      <view
-        class="knowledge-item"
-        wx:for="{{allKnowledgeList}}"
-        wx:key="id"
-        bindtap="goToDetail"
-        data-id="{{item.id}}"
-        data-name="{{item.name}}"
-      >
-        <view class="knowledge-info">
-          <text class="subject-tag-small">{{item.subject}}</text>
-          <text class="knowledge-name">{{item.name}}</text>
-          <text class="error-count">{{item.errorCount}} 道错题</text>
-        </view>
-        <view class="progress-info">
-          <view class="progress-bar-bg">
-            <view class="progress-bar-fill" style="width: {{item.masteredRate}}%"></view>
+  <!-- 错题列表 -->
+  <view class="error-list">
+    <view
+      class="error-item"
+      wx:for="{{errorList}}"
+      wx:key="_id"
+      bindtap="goToErrorDetail"
+      data-id="{{item._id}}"
+    >
+      <!-- 错题图片 -->
+      <image class="error-image" src="{{item.imageUrl}}" mode="aspectFill" />
+
+      <!-- 错题信息 -->
+      <view class="error-info">
+        <text class="error-content">{{item.content}}</text>
+        <view class="error-meta">
+          <text class="error-time">{{item.createTime}}</text>
+          <view class="error-tags">
+            <text wx:if="{{item.mastered}}" class="tag tag-mastered">已掌握</text>
+            <text wx:if="{{item.difficulty}}" class="tag tag-difficulty">{{item.difficulty}}</text>
           </view>
-          <text class="progress-text">{{item.masteredRate}}%</text>
         </view>
       </view>
+
+      <!-- 收藏按钮 -->
+      <view class="favorite-btn" catchtap="toggleFavorite" data-id="{{item._id}}" data-favorited="{{item.favorited}}">
+        <text class="favorite-icon">{{item.favorited ? '★' : '☆'}}</text>
+      </view>
+    </view>
+
+    <!-- 加载更多 -->
+    <view class="load-more" wx:if="{{hasMore && errorList.length > 0}}">
+      <text class="load-more-text">{{loadingMore ? '加载中...' : '下拉加载更多'}}</text>
+    </view>
+
+    <!-- 没有更多 -->
+    <view class="no-more" wx:if="{{!hasMore && errorList.length > 0}}">
+      <text class="no-more-text">没有更多了</text>
+    </view>
+
+    <!-- 空状态 -->
+    <view class="empty-state" wx:if="{{errorList.length === 0 && !refreshing}}">
+      <text class="empty-icon">📚</text>
+      <text class="empty-text">暂无错题</text>
+      <text class="empty-hint">去拍题页面添加错题吧</text>
     </view>
   </view>
 </scroll-view>

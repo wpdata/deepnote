@@ -3,17 +3,21 @@ Page({
     totalErrors: 0,
     masteredErrors: 0,
     unsolvedErrors: 0,
-    currentTab: 'subject', // 'subject' 或 'knowledge'
     currentSubject: 'math',
+    currentFilter: '', // 当前筛选条件: '' | 'favorited' | 'mastered' | 'unmastered' | 'wrong'
     subjects: [
       { id: 'math', name: '数学' },
-      { id: 'arithmetic', name: '算数' },
+      { id: 'arithmetic', name: '算术' },
       { id: 'chinese', name: '语文' },
       { id: 'english', name: '英语' }
     ],
-    knowledgeList: [],
-    allKnowledgeList: [],
-    refreshing: false  // 下拉刷新状态
+    errorList: [],
+    refreshing: false,
+    // 分页相关
+    pageSize: 20,
+    currentPage: 1,
+    hasMore: true,
+    loadingMore: false
   },
 
   onLoad(options) {
@@ -22,81 +26,88 @@ Page({
         currentSubject: options.subject
       })
     }
-    this.loadKnowledgeList()
+    this.loadErrorList(true)
   },
 
   onShow() {
-    // TabBar 页面不能通过 URL 参数传递数据
-    // 所以从全局数据中读取选中的学科
+    // 从全局数据读取选中的学科
     const app = getApp()
-    let needReload = false
-
     if (app.globalData && app.globalData.selectedSubject) {
       console.log('从全局数据读取选中的学科', app.globalData.selectedSubject)
       this.setData({
         currentSubject: app.globalData.selectedSubject.id
       })
-      needReload = true
-      // 读取后清除，避免下次进入时还是这个学科
       app.globalData.selectedSubject = null
     }
 
-    // 每次显示页面时都刷新数据，以显示最新保存的错题
-    console.log('onShow: 刷新错题本数据，当前学科:', this.data.currentSubject)
-
-    // 先清空旧数据，避免显示过期内容
+    // 刷新数据
     this.setData({
-      knowledgeList: [],
+      errorList: [],
       totalErrors: 0,
       masteredErrors: 0,
-      unsolvedErrors: 0
+      unsolvedErrors: 0,
+      currentPage: 1,
+      hasMore: true
     })
-
-    // 然后加载最新数据
-    this.loadKnowledgeList()
+    this.loadErrorList(true)
   },
 
-  switchTab(e) {
-    const tab = e.currentTarget.dataset.tab
-    this.setData({
-      currentTab: tab
-    })
-
-    // 切换到知识点视图时，加载所有学科的知识点
-    if (tab === 'knowledge' && this.data.allKnowledgeList.length === 0) {
-      this.loadAllKnowledgeList()
-    }
-  },
-
+  // 选择学科
   selectSubject(e) {
     const id = e.currentTarget.dataset.id
     this.setData({
-      currentSubject: id
+      currentSubject: id,
+      currentPage: 1,
+      hasMore: true,
+      errorList: []
     })
-    this.loadKnowledgeList()
+    this.loadErrorList(true)
   },
 
-  async loadKnowledgeList() {
-    try {
-      wx.showLoading({
-        title: '加载中...',
-        mask: true
-      })
+  // 选择筛选条件
+  selectFilter(e) {
+    const filter = e.currentTarget.dataset.filter
+    this.setData({
+      currentFilter: filter,
+      currentPage: 1,
+      hasMore: true,
+      errorList: []
+    })
+    this.loadErrorList(true)
+  },
 
-      // 将前端的学科ID转换为中文学科名
+  // 加载错题列表
+  async loadErrorList(isRefresh = false) {
+    if (this.data.loadingMore && !isRefresh) return
+    if (!this.data.hasMore && !isRefresh) return
+
+    try {
+      if (isRefresh) {
+        wx.showLoading({
+          title: '加载中...',
+          mask: true
+        })
+      } else {
+        this.setData({ loadingMore: true })
+      }
+
+      // 学科映射
       const subjectMap = {
         'math': '数学',
-        'arithmetic': '算数',
+        'arithmetic': '算术',
         'chinese': '语文',
         'english': '英语'
       }
       const subjectName = subjectMap[this.data.currentSubject]
 
-      // 通过云函数查询该学科下的所有错题
+      // 查询该学科下的所有错题
       const res = await wx.cloud.callFunction({
         name: 'getErrorsBySubject',
         data: {
-          subject: subjectName
+          subject: subjectName,
+          filter: this.data.currentFilter,
+          page: this.data.currentPage,
+          pageSize: this.data.pageSize
         }
       })
 
@@ -106,59 +117,52 @@ Page({
         throw new Error(res.result.error || '查询失败')
       }
 
-      const errorsData = res.result.data
+      let errorsData = res.result.data || []
 
-      // 计算总体统计数据
-      const totalErrors = errorsData.length
-      const masteredErrors = errorsData.filter(e => e.mastered).length
-      const unsolvedErrors = totalErrors - masteredErrors
-
-      // 按知识点汇总统计
-      const knowledgeMap = {}
-      errorsData.forEach(error => {
-        const kp = error.knowledgePoint
-        if (!knowledgeMap[kp]) {
-          knowledgeMap[kp] = {
-            name: kp,
-            subject: this.data.currentSubject,
-            errorCount: 0,
-            masteredCount: 0,
-            errors: []
-          }
-        }
-        knowledgeMap[kp].errorCount++
-        if (error.mastered) {
-          knowledgeMap[kp].masteredCount++
-        }
-        knowledgeMap[kp].errors.push(error)
+      // 按上传时间倒序排列
+      errorsData.sort((a, b) => {
+        const timeA = new Date(a.createTime || a._id).getTime()
+        const timeB = new Date(b.createTime || b._id).getTime()
+        return timeB - timeA
       })
 
-      // 计算掌握率
-      const knowledgeList = Object.values(knowledgeMap).map(item => ({
-        id: item.name,
-        name: item.name,
-        errorCount: item.errorCount,
-        masteredRate: item.errorCount > 0
-          ? Math.round((item.masteredCount / item.errorCount) * 100)
-          : 0,
-        subject: item.subject,
-        errors: item.errors
+      // 格式化时间
+      errorsData = errorsData.map(error => ({
+        ...error,
+        createTime: this.formatTime(error.createTime),
+        favorited: error.favorited || false
       }))
 
-      console.log('知识点统计', knowledgeList)
-      console.log('总体统计', { totalErrors, masteredErrors, unsolvedErrors })
+      // 计算统计数据
+      const totalErrors = res.result.total || errorsData.length
+      const masteredErrors = res.result.masteredCount || errorsData.filter(e => e.mastered).length
+      const unsolvedErrors = totalErrors - masteredErrors
+
+      // 判断是否还有更多数据
+      const hasMore = errorsData.length >= this.data.pageSize
+
+      // 合并数据
+      const errorList = isRefresh ? errorsData : [...this.data.errorList, ...errorsData]
 
       this.setData({
         totalErrors,
         masteredErrors,
         unsolvedErrors,
-        knowledgeList: knowledgeList
+        errorList,
+        hasMore,
+        loadingMore: false,
+        currentPage: this.data.currentPage + (isRefresh ? 0 : 1)
       })
 
-      wx.hideLoading()
+      if (isRefresh) {
+        wx.hideLoading()
+      }
     } catch (error) {
-      console.error('加载知识点列表失败', error)
-      wx.hideLoading()
+      console.error('加载错题列表失败', error)
+      if (isRefresh) {
+        wx.hideLoading()
+      }
+      this.setData({ loadingMore: false })
       wx.showToast({
         title: '加载失败',
         icon: 'none'
@@ -166,132 +170,94 @@ Page({
     }
   },
 
-  goToDetail(e) {
-    const { id, name } = e.currentTarget.dataset
-    console.log('点击知识点，dataset:', e.currentTarget.dataset)
-    console.log('当前视图:', this.data.currentTab)
+  // 加载更多
+  loadMore() {
+    if (!this.data.hasMore || this.data.loadingMore) return
+    this.loadErrorList(false)
+  },
 
-    // 根据当前视图选择数据源
-    let knowledge
-    if (this.data.currentTab === 'knowledge') {
-      // 在"知识点"视图中，从 allKnowledgeList 查找
-      knowledge = this.data.allKnowledgeList.find(item => item.id === id)
-      console.log('从 allKnowledgeList 查找')
-    } else {
-      // 在"学科"视图中，从 knowledgeList 查找
-      knowledge = this.data.knowledgeList.find(item => item.id === id)
-      console.log('从 knowledgeList 查找')
+  // 格式化时间
+  formatTime(timestamp) {
+    if (!timestamp) return ''
+
+    const date = new Date(timestamp)
+    const now = new Date()
+    const diff = now - date
+
+    // 小于1分钟
+    if (diff < 60000) {
+      return '刚刚'
     }
 
-    console.log('找到的知识点数据:', knowledge)
+    // 小于1小时
+    if (diff < 3600000) {
+      return Math.floor(diff / 60000) + '分钟前'
+    }
 
-    if (knowledge && knowledge.errors && knowledge.errors.length > 0) {
-      console.log('错题数量:', knowledge.errors.length)
+    // 小于24小时
+    if (diff < 86400000) {
+      return Math.floor(diff / 3600000) + '小时前'
+    }
 
-      // 如果只有一个错题，直接跳转到错题详情
-      if (knowledge.errors.length === 1) {
-        console.log('只有1个错题，直接跳转到详情页')
-        wx.navigateTo({
-          url: `/pages/error-detail/error-detail?errorId=${knowledge.errors[0]._id}`
-        })
-      } else {
-        // 如果有多个错题，跳转到错题列表页面
-        // 确定学科名称
-        let subjectName
-        if (this.data.currentTab === 'knowledge') {
-          // 在"知识点"视图中，学科名称在 knowledge.subject
-          subjectName = knowledge.subject
-        } else {
-          // 在"学科"视图中，需要从 currentSubject 映射
-          const subjectMap = {
-            'math': '数学',
-            'arithmetic': '算数',
-            'chinese': '语文',
-            'english': '英语'
-          }
-          subjectName = subjectMap[this.data.currentSubject]
+    // 小于7天
+    if (diff < 604800000) {
+      return Math.floor(diff / 86400000) + '天前'
+    }
+
+    // 格式化为 MM-DD
+    const month = date.getMonth() + 1
+    const day = date.getDate()
+    return `${month}-${day}`
+  },
+
+  // 跳转到错题详情
+  goToErrorDetail(e) {
+    const id = e.currentTarget.dataset.id
+    wx.navigateTo({
+      url: `/pages/error-detail/error-detail?errorId=${id}`
+    })
+  },
+
+  // 切换收藏状态
+  async toggleFavorite(e) {
+    const { id, favorited } = e.currentTarget.dataset
+
+    try {
+      // 调用云函数更新收藏状态
+      const res = await wx.cloud.callFunction({
+        name: 'toggleFavorite',
+        data: {
+          errorId: id,
+          favorited: !favorited
         }
+      })
 
-        const url = `/pages/error-list/error-list?knowledgePoint=${encodeURIComponent(knowledge.name)}&subject=${encodeURIComponent(subjectName)}`
-        console.log('有多个错题，跳转到列表页:', url)
+      if (res.result.success) {
+        // 更新本地数据
+        const errorList = this.data.errorList.map(error => {
+          if (error._id === id) {
+            return {
+              ...error,
+              favorited: !favorited
+            }
+          }
+          return error
+        })
 
-        wx.navigateTo({
-          url: url
+        this.setData({
+          errorList
+        })
+
+        wx.showToast({
+          title: favorited ? '已取消收藏' : '已收藏',
+          icon: 'success',
+          duration: 1000
         })
       }
-    } else {
-      console.error('知识点数据异常:', knowledge)
-      wx.showToast({
-        title: '该知识点暂无错题',
-        icon: 'none'
-      })
-    }
-  },
-
-  // 加载所有学科的知识点汇总
-  async loadAllKnowledgeList() {
-    try {
-      wx.showLoading({ title: '加载中...' })
-
-      // 获取所有学科的错题
-      const allSubjects = ['数学', '算数', '语文', '英语']
-      const allKnowledgeMap = {}
-
-      // 并行查询所有学科
-      const promises = allSubjects.map(subject =>
-        wx.cloud.callFunction({
-          name: 'getErrorsBySubject',
-          data: { subject }
-        })
-      )
-
-      const results = await Promise.all(promises)
-
-      // 汇总所有学科的知识点
-      results.forEach((res, index) => {
-        if (res.result.success) {
-          const subject = allSubjects[index]
-          res.result.data.forEach(error => {
-            const key = `${subject}-${error.knowledgePoint}`
-            if (!allKnowledgeMap[key]) {
-              allKnowledgeMap[key] = {
-                id: key,
-                name: error.knowledgePoint,
-                subject: subject,
-                errorCount: 0,
-                masteredCount: 0,
-                errors: []
-              }
-            }
-            allKnowledgeMap[key].errorCount++
-            if (error.mastered) {
-              allKnowledgeMap[key].masteredCount++
-            }
-            allKnowledgeMap[key].errors.push(error)
-          })
-        }
-      })
-
-      // 计算掌握率
-      const allKnowledgeList = Object.values(allKnowledgeMap).map(item => ({
-        ...item,
-        masteredRate: item.errorCount > 0
-          ? Math.round((item.masteredCount / item.errorCount) * 100)
-          : 0
-      }))
-
-      console.log('所有知识点汇总:', allKnowledgeList)
-
-      this.setData({
-        allKnowledgeList
-      })
-
-      wx.hideLoading()
     } catch (error) {
-      console.error('加载所有知识点失败', error)
-      wx.hideLoading()
+      console.error('切换收藏状态失败', error)
       wx.showToast({
-        title: '加载失败',
+        title: '操作失败',
         icon: 'none'
       })
     }
@@ -301,17 +267,13 @@ Page({
   async onPullDownRefresh() {
     console.log('用户下拉刷新')
     this.setData({
-      refreshing: true
+      refreshing: true,
+      currentPage: 1,
+      hasMore: true
     })
 
     try {
-      // 根据当前视图刷新对应的数据
-      if (this.data.currentTab === 'knowledge') {
-        await this.loadAllKnowledgeList()
-      } else {
-        await this.loadKnowledgeList()
-      }
-
+      await this.loadErrorList(true)
       wx.showToast({
         title: '刷新成功',
         icon: 'success',
@@ -324,7 +286,6 @@ Page({
         icon: 'none'
       })
     } finally {
-      // 结束刷新状态
       this.setData({
         refreshing: false
       })

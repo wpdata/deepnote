@@ -8,12 +8,17 @@ cloud.init({
 const db = cloud.database()
 
 /**
- * 根据学科查询错题列表
+ * 根据学科查询错题列表(支持筛选和分页)
  * @param {string} subject - 学科名称（中文）
+ * @param {string} filter - 筛选条件: '' | 'favorited' | 'mastered' | 'unmastered' | 'wrong'
+ * @param {number} page - 页码(从1开始)
+ * @param {number} pageSize - 每页数量
  * @returns {Object} 错题列表
  */
 exports.main = async (event, context) => {
-  const { subject } = event
+  const { subject, filter = '', page = 1, pageSize = 20 } = event
+  const wxContext = cloud.getWXContext()
+  const _ = db.command
 
   if (!subject) {
     return {
@@ -23,19 +28,55 @@ exports.main = async (event, context) => {
   }
 
   try {
-    // 查询该学科下的所有错题
+    // 构建查询条件
+    const where = {
+      subject: subject
+    }
+
+    // 添加筛选条件
+    if (filter === 'favorited') {
+      where.favorited = true
+    } else if (filter === 'mastered') {
+      where.mastered = true
+    } else if (filter === 'unmastered') {
+      where.mastered = false
+    } else if (filter === 'wrong') {
+      where.isCorrect = false
+    }
+
+    // 查询总数
+    const countRes = await db.collection('errors')
+      .where(where)
+      .count()
+
+    const total = countRes.total
+
+    // 分页查询
+    const skip = (page - 1) * pageSize
     const result = await db.collection('errors')
-      .where({
-        subject: subject
-      })
+      .where(where)
+      .orderBy('createTime', 'desc')
+      .skip(skip)
+      .limit(pageSize)
       .get()
 
-    console.log(`查询 ${subject} 学科错题成功，共 ${result.data.length} 条`)
+    // 统计已掌握数量
+    const masteredRes = await db.collection('errors')
+      .where({
+        subject: subject,
+        mastered: true
+      })
+      .count()
+
+    console.log(`查询 ${subject} 学科错题成功，共 ${total} 条，当前页 ${result.data.length} 条`)
 
     return {
       success: true,
       data: result.data,
-      count: result.data.length
+      total: total,
+      masteredCount: masteredRes.total,
+      page: page,
+      pageSize: pageSize
     }
 
   } catch (error) {

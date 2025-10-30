@@ -48,9 +48,9 @@ exports.main = async (event, context) => {
     return await recognizeAndFormatQuestion(imageData, fileID)
   }
 
-  // 模式3: 算数检查
+  // 模式3: 算术检查
   if (action === 'checkMath') {
-    console.log('进入算数检查模式')
+    console.log('进入算术检查模式')
     return await checkOralCalculation(fileID)
   }
 
@@ -1243,11 +1243,11 @@ ${mathResponse}
 }
 
 /**
- * 算数检查功能
+ * 算术检查功能
  * 使用阿里云 RecognizeEduOralCalculation API
  */
 async function checkOralCalculation(fileID) {
-  console.log('===== 算数检查开始 =====')
+  console.log('===== 算术检查开始 =====')
 
   try {
     // 1. 获取图片临时URL
@@ -1274,7 +1274,7 @@ async function checkOralCalculation(fileID) {
 
     const client = new AlibabaCloudOcr.default(config)
 
-    // 3. 调用算数检查API
+    // 3. 调用算术检查API
     const request = new AlibabaCloudOcr.RecognizeEduOralCalculationRequest({
       url: imageUrl
     })
@@ -1287,17 +1287,17 @@ async function checkOralCalculation(fileID) {
     if (response.statusCode !== 200 || !response.body?.data) {
       return {
         success: false,
-        error: '算数检查失败'
+        error: '算术检查失败'
       }
     }
 
     const data = JSON.parse(response.body.data)
-    console.log('算数检查原始结果:', JSON.stringify(data, null, 2))
+    console.log('算术检查原始结果:', JSON.stringify(data, null, 2))
 
     // 4. 解析结果
     const result = parseOralCalculationResult(data)
 
-    console.log('===== 算数检查完成 =====')
+    console.log('===== 算术检查完成 =====')
     console.log('总题数:', result.totalCount)
     console.log('正确数:', result.correctCount)
     console.log('错误数:', result.wrongCount)
@@ -1310,16 +1310,16 @@ async function checkOralCalculation(fileID) {
     }
 
   } catch (error) {
-    console.error('❌ 算数检查失败:', error)
+    console.error('❌ 算术检查失败:', error)
     return {
       success: false,
-      error: error.message || '算数检查失败'
+      error: error.message || '算术检查失败'
     }
   }
 }
 
 /**
- * 解析算数检查结果
+ * 解析算术检查结果
  */
 function parseOralCalculationResult(data) {
   const items = data.mathsInfo || []
@@ -1428,24 +1428,52 @@ function evaluateOCRQuality(text) {
  * 判断是否应该使用视觉模型
  */
 function shouldUseVisionModel(text, ocrQuality, subject) {
-  // 1. OCR质量很差，无法识别
-  if (ocrQuality === 'low' || ocrQuality === 'none') {
+  console.log('=== VL模型判断 ===')
+  console.log('OCR质量:', ocrQuality)
+  console.log('学科:', subject)
+  console.log('文本长度:', text.length)
+
+  // 1. OCR质量极差，完全无法识别（文本为空或太短）
+  if (ocrQuality === 'none' || text.length < 10) {
+    console.log('✓ 需要VL: OCR无法识别')
     return true
   }
 
-  // 2. 包含几何、图形相关关键词
-  if (/几何|图形|作图|画图|连线|匹配|配对|如图|下图|右图/.test(text)) {
+  // 2. OCR质量低，但有一定文本（可能是模糊或手写）
+  if (ocrQuality === 'low' && text.length < 30) {
+    console.log('✓ 需要VL: OCR质量低且文本过短')
     return true
   }
 
-  // 3. 数学题且OCR质量不高
-  if (subject === '数学' && ocrQuality === 'medium') {
-    // 检查是否包含图形相关内容
-    if (/图|线段|角|三角形|四边形|圆/.test(text)) {
-      return true
-    }
+  // 3. 明确的图形题特征（必须同时满足关键词+短文本）
+  const hasStrongImageIndicators = /如图所示|根据图|观察图|看图|下图是|右图为|图中|示意图/.test(text)
+  if (hasStrongImageIndicators) {
+    console.log('✓ 需要VL: 明确的图形题标识')
+    return true
   }
 
+  // 4. 几何图形题（包含图形关键词）
+  const hasGeometryKeywords = /画出|画一个|作出|连线|匹配图片|配对|连一连/.test(text)
+  if (hasGeometryKeywords) {
+    console.log('✓ 需要VL: 需要绘图或配对')
+    return true
+  }
+
+  // 5. 数学几何专业术语（表示可能有复杂图形）
+  const hasMathGeometry = subject === '数学' && /线段|射线|角平分线|垂直|平行|三角形|四边形|多边形|圆周|弧|扇形/.test(text)
+  if (hasMathGeometry && text.length < 50) {
+    console.log('✓ 需要VL: 数学几何题（文本较短可能需要看图）')
+    return true
+  }
+
+  // 6. 英语连线题、看图说话等
+  const hasEnglishImageTask = subject === '英语' && /match|connect|look and|看图|连线/.test(text.toLowerCase())
+  if (hasEnglishImageTask) {
+    console.log('✓ 需要VL: 英语图片题')
+    return true
+  }
+
+  console.log('✗ 不需要VL: 纯文本题，使用OCR+DeepSeek即可')
   return false
 }
 

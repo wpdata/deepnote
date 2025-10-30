@@ -15,7 +15,7 @@ Page({
       },
       {
         id: 'arithmetic',
-        name: '算数',
+        name: '算术',
         bgColor: '#FFF9E6',
         icon: '🧮',
         progress: 0

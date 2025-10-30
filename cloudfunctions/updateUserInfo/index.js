@@ -14,7 +14,7 @@ exports.main = async (event, context) => {
   try {
     // 查询用户记录
     const userQuery = await db.collection('users').where({
-      openId: openId
+      _openid: openId
     }).get();
 
     if (userQuery.data.length === 0) {

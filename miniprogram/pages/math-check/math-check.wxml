@@ -1,8 +1,8 @@
 <view class="container">
   <!-- 顶部说明 -->
   <view class="header">
-    <view class="title">📐 算数检查</view>
-    <view class="subtitle">拍照上传算数作业，AI自动批改</view>
+    <view class="title">📐 算术检查</view>
+    <view class="subtitle">拍照上传算术作业，AI自动批改</view>
   </view>
 
   <!-- 拍照/选择图片区域 -->
@@ -10,7 +10,7 @@
     <view class="upload-box" bindtap="chooseImage">
       <text class="upload-emoji">📷</text>
       <text class="upload-text">拍照或选择图片</text>
-      <text class="upload-hint">支持加减乘除算数题</text>
+      <text class="upload-hint">支持加减乘除算术题</text>
     </view>
   </view>
 
