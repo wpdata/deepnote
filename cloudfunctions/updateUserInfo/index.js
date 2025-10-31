@@ -17,15 +17,6 @@ exports.main = async (event, context) => {
       _openid: openId
     }).get();
 
-    if (userQuery.data.length === 0) {
-      return {
-        success: false,
-        error: '用户不存在'
-      };
-    }
-
-    const userId = userQuery.data[0]._id;
-
     // 准备更新数据
     const updateData = {
       updateTime: new Date().toISOString()
@@ -44,12 +35,37 @@ exports.main = async (event, context) => {
       updateData.grade = event.grade;
     }
 
-    // 更新用户信息
-    await db.collection('users').doc(userId).update({
-      data: updateData
-    });
+    let userId;
 
-    console.log('用户信息更新成功:', userId, updateData);
+    if (userQuery.data.length === 0) {
+      // 新用户：创建用户记录
+      const createData = {
+        _openid: openId,
+        nickName: event.nickName || '新用户',
+        avatarUrl: event.avatarUrl || '',
+        grade: event.grade || null,
+        studyDays: 0,
+        practiceCount: 0,
+        createTime: db.serverDate(),
+        updateTime: db.serverDate()
+      };
+
+      const createRes = await db.collection('users').add({
+        data: createData
+      });
+
+      userId = createRes._id;
+      console.log('新用户创建成功:', userId, createData);
+    } else {
+      // 已有用户：更新用户信息
+      userId = userQuery.data[0]._id;
+
+      await db.collection('users').doc(userId).update({
+        data: updateData
+      });
+
+      console.log('用户信息更新成功:', userId, updateData);
+    }
 
     return {
       success: true,

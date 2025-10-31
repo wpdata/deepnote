@@ -28,8 +28,9 @@ exports.main = async (event, context) => {
   }
 
   try {
-    // 构建查询条件
+    // 构建查询条件（必须包含用户过滤）
     const where = {
+      _openid: wxContext.OPENID,
       subject: subject
     }
 
@@ -60,9 +61,10 @@ exports.main = async (event, context) => {
       .limit(pageSize)
       .get()
 
-    // 统计已掌握数量
+    // 统计已掌握数量（仅当前用户）
     const masteredRes = await db.collection('errors')
       .where({
+        _openid: wxContext.OPENID,
         subject: subject,
         mastered: true
       })

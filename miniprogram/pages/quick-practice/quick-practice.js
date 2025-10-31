@@ -37,11 +37,12 @@ Page({
 
       // 随机从用户的未掌握错题中选择
       const db = wx.cloud.database()
+      const _ = db.command
       const errorsRes = await db.collection('errors')
-        .where({
-          mastered: false,
-          ...(this.data.subject ? { subject: this.data.subject } : {})
-        })
+        .where(_.and([
+          { mastered: false },
+          ...(this.data.subject ? [{ subject: this.data.subject }] : [])
+        ]))
         .limit(10)
         .get()
 

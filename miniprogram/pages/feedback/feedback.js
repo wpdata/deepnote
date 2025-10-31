@@ -26,10 +26,8 @@ Page({
   // 加载历史反馈
   async loadHistory() {
     try {
+      // 数据库权限规则已设置 doc._openid == auth.openid，无需在查询中指定
       const res = await db.collection('feedbacks')
-        .where({
-          _openid: '{openid}' // 云端会自动填充
-        })
         .orderBy('createTime', 'desc')
         .limit(20)
         .get()

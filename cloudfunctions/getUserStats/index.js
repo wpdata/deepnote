@@ -19,11 +19,14 @@ exports.main = async (event, context) => {
   const openid = wxContext.OPENID || 'test_user_openid'
 
   try {
-    // 直接从 errors 集合获取所有错题数据进行实时统计
-    const errorsResult = await db.collection('errors').limit(100).get()
+    // 直接从 errors 集合获取当前用户的所有错题数据进行实时统计
+    const errorsResult = await db.collection('errors')
+      .where({ _openid: openid })
+      .limit(100)
+      .get()
     const allErrors = errorsResult.data
 
-    console.log('查询到错题数量:', allErrors.length)
+    console.log('查询到用户错题数量:', allErrors.length)
 
     // 1. 计算总体统计
     const totalErrors = allErrors.length
@@ -58,8 +61,9 @@ exports.main = async (event, context) => {
         : 0
     })
 
-    // 3. 获取最近的练习记录
+    // 3. 获取最近的练习记录（仅查询当前用户）
     const recentPractices = await db.collection('practices')
+      .where({ userId: openid })
       .orderBy('createTime', 'desc')
       .limit(10)
       .get()
