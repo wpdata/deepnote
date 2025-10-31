@@ -10,8 +10,7 @@ Page({
         id: 'math',
         name: '数学',
         bgColor: '#E3F2FD',
-        icon: '🔢',
-        iconUrl: '/images/subjects/math.png',
+        icon: '📐',
         progress: 0
       },
       {
@@ -19,23 +18,20 @@ Page({
         name: '算术',
         bgColor: '#FFF9E6',
         icon: '🧮',
-        iconUrl: '/images/subjects/math.png',
         progress: 0
       },
       {
         id: 'chinese',
         name: '语文',
         bgColor: '#FCE4EC',
-        icon: '📚',
-        iconUrl: '/images/subjects/chinese.png',
+        icon: '📖',
         progress: 0
       },
       {
         id: 'english',
         name: '英语',
         bgColor: '#F3E5F5',
-        icon: '🔤',
-        iconUrl: '/images/subjects/english-alt.png',
+        icon: '🌍',
         progress: 0
       }
     ],

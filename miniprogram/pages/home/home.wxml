@@ -40,7 +40,7 @@
       data-id="{{item.id}}"
       data-name="{{item.name}}"
     >
-      <image class="subject-icon-img" src="{{item.iconUrl}}" mode="aspectFit" />
+      <view class="subject-icon">{{item.icon}}</view>
       <view class="subject-info">
         <text class="subject-name">{{item.name}}</text>
         <text class="quick-practice">快速练习</text>

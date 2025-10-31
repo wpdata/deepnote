@@ -25,27 +25,19 @@
     "list": [
       {
         "pagePath": "pages/home/home",
-        "text": "首页",
-        "iconPath": "images/tabbar/home.png",
-        "selectedIconPath": "images/tabbar/home-active.png"
+        "text": "首页"
       },
       {
         "pagePath": "pages/scan/scan",
-        "text": "扫描",
-        "iconPath": "images/tabbar/scan.png",
-        "selectedIconPath": "images/tabbar/scan-active.png"
+        "text": "扫描"
       },
       {
         "pagePath": "pages/errorbook/errorbook",
-        "text": "错题",
-        "iconPath": "images/tabbar/errorbook.png",
-        "selectedIconPath": "images/tabbar/errorbook-active.png"
+        "text": "错题"
       },
       {
         "pagePath": "pages/profile/profile",
-        "text": "我的",
-        "iconPath": "images/tabbar/profile.png",
-        "selectedIconPath": "images/tabbar/profile-active.png"
+        "text": "我的"
       }
     ]
   },
