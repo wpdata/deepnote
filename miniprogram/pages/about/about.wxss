@@ -48,9 +48,7 @@
 
 /* 卡片通用样式 */
 .intro-card,
-.features-card,
-.tech-card,
-.contact-card {
+.features-card {
   background: #fff;
   border-radius: 24rpx;
   padding: 32rpx;
@@ -123,62 +121,6 @@
   font-size: 24rpx;
   color: #999;
   line-height: 1.5;
-}
-
-/* 技术支持 */
-.tech-list {
-  display: flex;
-  flex-direction: column;
-  gap: 16rpx;
-}
-
-.tech-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 20rpx;
-  background: #f8f8f8;
-  border-radius: 12rpx;
-}
-
-.tech-label {
-  font-size: 26rpx;
-  color: #666;
-}
-
-.tech-value {
-  font-size: 26rpx;
-  color: #333;
-  font-weight: 500;
-  text-align: right;
-  flex: 1;
-  margin-left: 20rpx;
-}
-
-/* 联系方式 */
-.contact-list {
-  display: flex;
-  flex-direction: column;
-  gap: 16rpx;
-}
-
-.contact-item {
-  display: flex;
-  align-items: center;
-  gap: 16rpx;
-  padding: 20rpx;
-  background: #f8f8f8;
-  border-radius: 12rpx;
-}
-
-.contact-icon {
-  font-size: 32rpx;
-  flex-shrink: 0;
-}
-
-.contact-text {
-  font-size: 26rpx;
-  color: #333;
 }
 
 /* 底部版权 */

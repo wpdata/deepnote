@@ -51,48 +51,6 @@
     </view>
   </view>
 
-  <!-- 技术支持 -->
-  <view class="tech-card">
-    <text class="card-title">技术支持</text>
-    <view class="tech-list">
-      <view class="tech-item">
-        <text class="tech-label">前端框架</text>
-        <text class="tech-value">微信小程序原生框架</text>
-      </view>
-      <view class="tech-item">
-        <text class="tech-label">后端服务</text>
-        <text class="tech-value">腾讯云开发 CloudBase</text>
-      </view>
-      <view class="tech-item">
-        <text class="tech-label">AI 能力</text>
-        <text class="tech-value">OCR 文字识别 + 知识点分析</text>
-      </view>
-      <view class="tech-item">
-        <text class="tech-label">数据存储</text>
-        <text class="tech-value">云数据库 + 云存储</text>
-      </view>
-    </view>
-  </view>
-
-  <!-- 联系方式 -->
-  <view class="contact-card">
-    <text class="card-title">联系我们</text>
-    <view class="contact-list">
-      <view class="contact-item">
-        <text class="contact-icon">📧</text>
-        <text class="contact-text">邮箱: support@deepnote.com</text>
-      </view>
-      <view class="contact-item">
-        <text class="contact-icon">💬</text>
-        <text class="contact-text">微信客服: DeepNote_Support</text>
-      </view>
-      <view class="contact-item">
-        <text class="contact-icon">🌐</text>
-        <text class="contact-text">官网: www.deepnote.com</text>
-      </view>
-    </view>
-  </view>
-
   <!-- 底部版权 -->
   <view class="footer">
     <text class="copyright">© 2025 DeepNote Team</text>
