@@ -11,13 +11,7 @@ Page({
         name: '数学',
         bgColor: '#E3F2FD',
         icon: '🔢',
-        progress: 0
-      },
-      {
-        id: 'arithmetic',
-        name: '算术',
-        bgColor: '#FFF9E6',
-        icon: '🧮',
+        iconUrl: '/images/subjects/math.png',
         progress: 0
       },
       {
@@ -25,6 +19,7 @@ Page({
         name: '语文',
         bgColor: '#FCE4EC',
         icon: '📚',
+        iconUrl: '/images/subjects/literature.png',
         progress: 0
       },
       {
@@ -32,6 +27,31 @@ Page({
         name: '英语',
         bgColor: '#F3E5F5',
         icon: '🔤',
+        iconUrl: '/images/subjects/english.png',
+        progress: 0
+      },
+      {
+        id: 'physics',
+        name: '物理',
+        bgColor: '#E8F5E9',
+        icon: '⚡',
+        iconUrl: '/images/subjects/physics.png',
+        progress: 0
+      },
+      {
+        id: 'chemistry',
+        name: '化学',
+        bgColor: '#FFF3E0',
+        icon: '⚗️',
+        iconUrl: '/images/subjects/chemistry.png',
+        progress: 0
+      },
+      {
+        id: 'biology',
+        name: '生物',
+        bgColor: '#E0F2F1',
+        icon: '🧬',
+        iconUrl: '/images/subjects/biology.png',
         progress: 0
       }
     ],

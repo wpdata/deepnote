@@ -181,7 +181,24 @@
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.subject-card:active .subject-icon {
+/* 图片图标样式 */
+.subject-icon-img {
+  width: 100rpx;
+  height: 100rpx;
+  margin-bottom: 20rpx;
+  pointer-events: none;
+  padding: 20rpx;
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 50%;
+  box-shadow:
+    0 8rpx 24rpx rgba(0, 0, 0, 0.12),
+    inset 0 2rpx 6rpx rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(20rpx);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.subject-card:active .subject-icon,
+.subject-card:active .subject-icon-img {
   transform: scale(0.9);
 }
 
