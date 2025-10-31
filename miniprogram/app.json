@@ -9,7 +9,10 @@
     "pages/practice/practice",
     "pages/quick-practice/quick-practice",
     "pages/profile/profile",
-    "pages/grade-select/grade-select"
+    "pages/grade-select/grade-select",
+    "pages/feedback/feedback",
+    "pages/help/help",
+    "pages/about/about"
   ],
   "window": {
     "backgroundTextStyle": "light",

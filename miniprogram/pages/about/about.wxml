@@ -1,0 +1,101 @@
+<view class="container">
+  <!-- 顶部 Logo 区域 -->
+  <view class="header">
+    <view class="logo-container">
+      <text class="logo-icon">📚</text>
+    </view>
+    <text class="app-name">DeepNote 智能错题本</text>
+    <text class="version">v1.0.0</text>
+  </view>
+
+  <!-- 应用介绍 -->
+  <view class="intro-card">
+    <text class="intro-title">产品介绍</text>
+    <text class="intro-text">
+      DeepNote 是一款基于 AI 技术的智能错题整理工具,帮助学生高效管理和复习错题,提升学习效率。通过智能拍照识别、自动分类整理、科学复习提醒等功能,让学习更加轻松高效。
+    </text>
+  </view>
+
+  <!-- 核心功能 -->
+  <view class="features-card">
+    <text class="card-title">核心功能</text>
+    <view class="feature-list">
+      <view class="feature-item">
+        <text class="feature-icon">📷</text>
+        <view class="feature-content">
+          <text class="feature-name">智能拍照识别</text>
+          <text class="feature-desc">AI 自动识别题目内容和知识点</text>
+        </view>
+      </view>
+      <view class="feature-item">
+        <text class="feature-icon">📊</text>
+        <view class="feature-content">
+          <text class="feature-name">数据统计分析</text>
+          <text class="feature-desc">全面掌握学习进度和薄弱点</text>
+        </view>
+      </view>
+      <view class="feature-item">
+        <text class="feature-icon">🎯</text>
+        <view class="feature-content">
+          <text class="feature-name">智能练习推荐</text>
+          <text class="feature-desc">根据掌握情况推荐复习题目</text>
+        </view>
+      </view>
+      <view class="feature-item">
+        <text class="feature-icon">☁️</text>
+        <view class="feature-content">
+          <text class="feature-name">云端同步存储</text>
+          <text class="feature-desc">多设备数据实时同步,永不丢失</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 技术支持 -->
+  <view class="tech-card">
+    <text class="card-title">技术支持</text>
+    <view class="tech-list">
+      <view class="tech-item">
+        <text class="tech-label">前端框架</text>
+        <text class="tech-value">微信小程序原生框架</text>
+      </view>
+      <view class="tech-item">
+        <text class="tech-label">后端服务</text>
+        <text class="tech-value">腾讯云开发 CloudBase</text>
+      </view>
+      <view class="tech-item">
+        <text class="tech-label">AI 能力</text>
+        <text class="tech-value">OCR 文字识别 + 知识点分析</text>
+      </view>
+      <view class="tech-item">
+        <text class="tech-label">数据存储</text>
+        <text class="tech-value">云数据库 + 云存储</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 联系方式 -->
+  <view class="contact-card">
+    <text class="card-title">联系我们</text>
+    <view class="contact-list">
+      <view class="contact-item">
+        <text class="contact-icon">📧</text>
+        <text class="contact-text">邮箱: support@deepnote.com</text>
+      </view>
+      <view class="contact-item">
+        <text class="contact-icon">💬</text>
+        <text class="contact-text">微信客服: DeepNote_Support</text>
+      </view>
+      <view class="contact-item">
+        <text class="contact-icon">🌐</text>
+        <text class="contact-text">官网: www.deepnote.com</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 底部版权 -->
+  <view class="footer">
+    <text class="copyright">© 2025 DeepNote Team</text>
+    <text class="copyright">All Rights Reserved</text>
+  </view>
+</view>

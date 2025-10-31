@@ -60,7 +60,7 @@
   <view class="menu-section">
     <view class="menu-item" bindtap="onChangeGrade">
       <view class="menu-left">
-        <image class="menu-icon-img" src="/images/menu/grade.png" mode="aspectFit" />
+        <view class="menu-icon">🎓</view>
         <text class="menu-title">年级设置</text>
       </view>
       <view class="menu-right">
@@ -69,33 +69,9 @@
       </view>
     </view>
 
-    <view class="menu-item" bindtap="onBackupData">
-      <view class="menu-left">
-        <image class="menu-icon-img" src="/images/menu/backup.png" mode="aspectFit" />
-        <text class="menu-title">数据备份与同步</text>
-      </view>
-      <text class="arrow-icon">›</text>
-    </view>
-
-    <view class="menu-item" bindtap="onSubjectManage">
-      <view class="menu-left">
-        <image class="menu-icon-img" src="/images/menu/subject.png" mode="aspectFit" />
-        <text class="menu-title">学科管理</text>
-      </view>
-      <text class="arrow-icon">›</text>
-    </view>
-
-    <view class="menu-item" bindtap="onNotificationSettings">
-      <view class="menu-left">
-        <image class="menu-icon-img" src="/images/menu/notification.png" mode="aspectFit" />
-        <text class="menu-title">通知设置</text>
-      </view>
-      <text class="arrow-icon">›</text>
-    </view>
-
     <view class="menu-item" bindtap="onFeedback">
       <view class="menu-left">
-        <image class="menu-icon-img" src="/images/menu/feedback.png" mode="aspectFit" />
+        <view class="menu-icon">💬</view>
         <text class="menu-title">帮助与反馈</text>
       </view>
       <text class="arrow-icon">›</text>
@@ -103,7 +79,7 @@
 
     <view class="menu-item" bindtap="onAbout">
       <view class="menu-left">
-        <image class="menu-icon-img" src="/images/menu/about.png" mode="aspectFit" />
+        <view class="menu-icon">ℹ️</view>
         <text class="menu-title">关于我们</text>
       </view>
       <text class="arrow-icon">›</text>

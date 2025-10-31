@@ -213,31 +213,6 @@ Page({
     }
   },
 
-  onBackupData() {
-    wx.showLoading({
-      title: '同步中...'
-    })
-
-    // TODO: 调用云函数进行数据备份
-    wx.cloud.callFunction({
-      name: 'backupData',
-      success: (res) => {
-        wx.hideLoading()
-        wx.showToast({
-          title: '同步成功',
-          icon: 'success'
-        })
-      },
-      fail: (err) => {
-        wx.hideLoading()
-        wx.showToast({
-          title: '同步失败',
-          icon: 'none'
-        })
-      }
-    })
-  },
-
   // 修改年级
   onChangeGrade() {
     wx.navigateTo({
@@ -245,33 +220,15 @@ Page({
     })
   },
 
-  onSubjectManage() {
-    wx.showToast({
-      title: '学科管理功能开发中',
-      icon: 'none'
-    })
-  },
-
-  onNotificationSettings() {
-    wx.showToast({
-      title: '通知设置功能开发中',
-      icon: 'none'
-    })
-  },
-
   onFeedback() {
-    wx.showModal({
-      title: '帮助与反馈',
-      content: '如有问题或建议，请通过小程序内的反馈功能联系我们',
-      showCancel: false
+    wx.navigateTo({
+      url: '/pages/feedback/feedback'
     })
   },
 
   onAbout() {
-    wx.showModal({
-      title: '关于我们',
-      content: '智能错题整理小程序\n版本：1.0.0\n\n一个帮助学生高效整理和复习错题的智能学习工具',
-      showCancel: false
+    wx.navigateTo({
+      url: '/pages/about/about'
     })
   },
 

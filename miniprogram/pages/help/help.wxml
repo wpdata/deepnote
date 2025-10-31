@@ -1,0 +1,130 @@
+<view class="container">
+  <!-- 顶部标题 -->
+  <view class="header">
+    <text class="title">帮助中心</text>
+    <text class="subtitle">DeepNote 使用指南</text>
+  </view>
+
+  <!-- 帮助内容 -->
+  <scroll-view class="content" scroll-y>
+    <!-- 快速开始 -->
+    <view class="section">
+      <view class="section-header">
+        <text class="section-icon">🚀</text>
+        <text class="section-title">快速开始</text>
+      </view>
+      <view class="help-item">
+        <text class="help-title">1. 拍照识别错题</text>
+        <text class="help-desc">点击底部"扫描"按钮，对准错题拍照，AI会自动识别题目内容</text>
+      </view>
+      <view class="help-item">
+        <text class="help-title">2. 编辑题目信息</text>
+        <text class="help-desc">确认识别结果，可以编辑题目、答案、学科、难度等信息</text>
+      </view>
+      <view class="help-item">
+        <text class="help-title">3. 保存到错题本</text>
+        <text class="help-desc">点击"保存"按钮，题目会自动归类到对应学科的错题本中</text>
+      </view>
+    </view>
+
+    <!-- 功能说明 -->
+    <view class="section">
+      <view class="section-header">
+        <text class="section-icon">📖</text>
+        <text class="section-title">功能说明</text>
+      </view>
+
+      <view class="help-item">
+        <text class="help-title">📷 拍照识别</text>
+        <text class="help-desc">• 确保光线充足，题目清晰可见</text>
+        <text class="help-desc">• 支持手写和印刷体识别</text>
+        <text class="help-desc">• 可选择题目类型和学科提高准确率</text>
+      </view>
+
+      <view class="help-item">
+        <text class="help-title">🧮 口算检查</text>
+        <text class="help-desc">• 首页快捷功能可快速批改口算作业</text>
+        <text class="help-desc">• 支持加减乘除混合运算</text>
+        <text class="help-desc">• 自动标记对错，生成批改报告</text>
+      </view>
+
+      <view class="help-item">
+        <text class="help-title">📚 错题管理</text>
+        <text class="help-desc">• 按学科分类查看错题</text>
+        <text class="help-desc">• 支持标记"已掌握"状态</text>
+        <text class="help-desc">• 查看知识点掌握进度</text>
+      </view>
+
+      <view class="help-item">
+        <text class="help-title">✍️ 练习模式</text>
+        <text class="help-desc">• 针对薄弱知识点智能推荐练习</text>
+        <text class="help-desc">• 支持按学科快速练习</text>
+        <text class="help-desc">• 记录练习历史和进步轨迹</text>
+      </view>
+    </view>
+
+    <!-- 常见问题 -->
+    <view class="section">
+      <view class="section-header">
+        <text class="section-icon">❓</text>
+        <text class="section-title">常见问题</text>
+      </view>
+
+      <view class="help-item">
+        <text class="help-title">Q: 识别不准确怎么办？</text>
+        <text class="help-desc">A: 请确保拍照时光线充足、题目清晰，可以在拍照后手动编辑修正识别结果。</text>
+      </view>
+
+      <view class="help-item">
+        <text class="help-title">Q: 如何删除错题？</text>
+        <text class="help-desc">A: 进入错题详情页，点击右上角的删除按钮即可。</text>
+      </view>
+
+      <view class="help-item">
+        <text class="help-title">Q: 数据会丢失吗？</text>
+        <text class="help-desc">A: 所有数据都保存在云端，只要使用同一个微信账号登录，数据会自动同步。</text>
+      </view>
+
+      <view class="help-item">
+        <text class="help-title">Q: 支持哪些学科？</text>
+        <text class="help-desc">A: 目前支持数学、算术、语文、英语等学科，后续会增加更多学科支持。</text>
+      </view>
+    </view>
+
+    <!-- 使用技巧 -->
+    <view class="section">
+      <view class="section-header">
+        <text class="section-icon">💡</text>
+        <text class="section-title">使用技巧</text>
+      </view>
+
+      <view class="help-item">
+        <text class="help-title">提升识别准确率</text>
+        <text class="help-desc">• 拍照时保持手机稳定，避免抖动</text>
+        <text class="help-desc">• 确保题目完整在取景框内</text>
+        <text class="help-desc">• 选择正确的题目类型和学科</text>
+      </view>
+
+      <view class="help-item">
+        <text class="help-title">高效整理错题</text>
+        <text class="help-desc">• 及时填写知识点，便于后续复习</text>
+        <text class="help-desc">• 掌握后及时标记，追踪学习进度</text>
+        <text class="help-desc">• 定期复习错题，巩固薄弱知识点</text>
+      </view>
+    </view>
+
+    <!-- 联系我们 -->
+    <view class="section">
+      <view class="section-header">
+        <text class="section-icon">📬</text>
+        <text class="section-title">联系我们</text>
+      </view>
+      <view class="help-item">
+        <text class="help-desc">如有任何问题或建议，欢迎通过"帮助与反馈"提交反馈，我们会及时处理。</text>
+      </view>
+      <button class="feedback-btn" bindtap="goToFeedback">
+        💬 提交反馈
+      </button>
+    </view>
+  </scroll-view>
+</view>

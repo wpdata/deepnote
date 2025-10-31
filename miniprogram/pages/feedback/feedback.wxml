@@ -1,0 +1,73 @@
+<view class="container">
+  <!-- 顶部提示 -->
+  <view class="header">
+    <text class="header-icon">💬</text>
+    <text class="header-title">帮助与反馈</text>
+    <text class="header-desc">您的意见对我们很重要</text>
+  </view>
+
+  <!-- 反馈表单 -->
+  <view class="form">
+    <!-- 反馈类型 -->
+    <view class="form-item">
+      <text class="form-label">反馈类型</text>
+      <picker mode="selector" range="{{feedbackTypes}}" value="{{typeIndex}}" bindchange="onTypeChange">
+        <view class="picker-view">
+          <text>{{feedbackTypes[typeIndex]}}</text>
+          <text class="arrow">▼</text>
+        </view>
+      </picker>
+    </view>
+
+    <!-- 反馈内容 -->
+    <view class="form-item">
+      <text class="form-label">反馈内容 <text class="required">*</text></text>
+      <textarea
+        class="textarea"
+        placeholder="请详细描述您遇到的问题或建议..."
+        value="{{content}}"
+        bindinput="onContentInput"
+        maxlength="-1"
+        auto-height
+      />
+      <text class="char-count">{{content.length}} 字</text>
+    </view>
+
+    <!-- 联系方式(可选) -->
+    <view class="form-item">
+      <text class="form-label">联系方式 (可选)</text>
+      <input
+        class="input"
+        placeholder="请留下您的联系方式，方便我们回复"
+        value="{{contact}}"
+        bindinput="onContactInput"
+      />
+    </view>
+
+    <!-- 提交按钮 -->
+    <button class="submit-btn" bindtap="onSubmit" disabled="{{submitting}}">
+      {{submitting ? '提交中...' : '提交反馈'}}
+    </button>
+  </view>
+
+  <!-- 历史反馈 -->
+  <view class="history" wx:if="{{historyList.length > 0}}">
+    <view class="history-header">
+      <text class="history-title">我的反馈</text>
+      <text class="history-count">共 {{historyList.length}} 条</text>
+    </view>
+    <view class="history-list">
+      <view class="history-item" wx:for="{{historyList}}" wx:key="_id">
+        <view class="history-top">
+          <text class="history-type">{{item.type}}</text>
+          <text class="history-time">{{item.createTime}}</text>
+        </view>
+        <text class="history-content">{{item.content}}</text>
+        <view class="history-status" wx:if="{{item.reply}}">
+          <text class="status-label">官方回复:</text>
+          <text class="status-text">{{item.reply}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>
