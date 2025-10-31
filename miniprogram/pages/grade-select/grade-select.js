@@ -23,7 +23,8 @@ Page({
     middleGrades: [],
     highGrades: [],
     selectedGrade: null,
-    isFirstTime: true // 是否首次选择
+    isFirstTime: true, // 是否首次选择
+    nickName: '' // 用户昵称
   },
 
   onLoad(options) {
@@ -40,6 +41,13 @@ Page({
     })
   },
 
+  // 昵称输入
+  onNicknameInput(e) {
+    this.setData({
+      nickName: e.detail.value
+    })
+  },
+
   // 选择年级
   onSelectGrade(e) {
     const { level, category, display } = e.currentTarget.dataset
@@ -51,6 +59,15 @@ Page({
 
   // 确认选择
   async onConfirm() {
+    // 验证输入
+    if (this.data.isFirstTime && !this.data.nickName.trim()) {
+      wx.showToast({
+        title: '请输入昵称',
+        icon: 'none'
+      })
+      return
+    }
+
     if (!this.data.selectedGrade) {
       wx.showToast({
         title: '请选择年级',
@@ -62,12 +79,20 @@ Page({
     try {
       wx.showLoading({ title: '保存中...' })
 
-      // 调用云函数保存年级信息
+      // 准备提交数据
+      const submitData = {
+        grade: this.data.selectedGrade
+      }
+
+      // 首次使用时，同时提交昵称
+      if (this.data.isFirstTime) {
+        submitData.nickName = this.data.nickName.trim()
+      }
+
+      // 调用云函数保存信息
       const res = await wx.cloud.callFunction({
         name: 'updateUserInfo',
-        data: {
-          grade: this.data.selectedGrade
-        }
+        data: submitData
       })
 
       wx.hideLoading()

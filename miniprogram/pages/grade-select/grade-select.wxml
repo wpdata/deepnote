@@ -1,8 +1,21 @@
 <view class="container">
   <!-- 头部说明 -->
   <view class="header">
-    <text class="title">{{isFirstTime ? '选择你的年级' : '修改年级'}}</text>
-    <text class="subtitle">{{isFirstTime ? '帮助我们为你提供更好的学习体验' : '选择你当前所在的年级'}}</text>
+    <text class="title">{{isFirstTime ? '欢迎使用智能错题本' : '修改年级'}}</text>
+    <text class="subtitle">{{isFirstTime ? '请设置你的个人信息' : '选择你当前所在的年级'}}</text>
+  </view>
+
+  <!-- 昵称输入（仅首次显示） -->
+  <view class="nickname-section" wx:if="{{isFirstTime}}">
+    <view class="input-label">你的昵称</view>
+    <input
+      class="nickname-input"
+      type="nickname"
+      placeholder="请输入你的昵称"
+      value="{{nickName}}"
+      bindinput="onNicknameInput"
+      maxlength="20"
+    />
   </view>
 
   <!-- 年级选择区域 -->

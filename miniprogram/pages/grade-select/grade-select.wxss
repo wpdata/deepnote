@@ -24,6 +24,38 @@
   color: #8a8a8a;
 }
 
+/* 昵称输入区域 */
+.nickname-section {
+  background: #ffffff;
+  border-radius: 16rpx;
+  padding: 32rpx 24rpx;
+  margin-bottom: 40rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.06);
+}
+
+.input-label {
+  font-size: 28rpx;
+  color: #1a1a1a;
+  font-weight: 600;
+  margin-bottom: 16rpx;
+}
+
+.nickname-input {
+  width: 100%;
+  height: 88rpx;
+  background: #f5f7fa;
+  border: 2rpx solid #e8e8e8;
+  border-radius: 12rpx;
+  padding: 0 24rpx;
+  font-size: 28rpx;
+  color: #1a1a1a;
+}
+
+.nickname-input:focus {
+  border-color: #1677FF;
+  background: #ffffff;
+}
+
 /* 年级选择区域 */
 .grade-sections {
   margin-bottom: 40rpx;
