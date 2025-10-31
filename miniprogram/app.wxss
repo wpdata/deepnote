@@ -1,12 +1,17 @@
 /**app.wxss**/
+
+/* 引入全局通用样式 */
+@import "/styles/common.wxss";
+
 page {
-  --primary-color: #6A5ACD;
+  --primary-color: #667eea;
+  --primary-light: #764ba2;
   --secondary-color: #9370DB;
   --text-color: #333333;
   --light-text: #888888;
   --background: #F5F5F5;
   --white: #FFFFFF;
-  
+
   background-color: var(--background);
   font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica,
     'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei UI', 'Microsoft YaHei',

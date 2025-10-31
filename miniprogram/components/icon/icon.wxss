@@ -1,0 +1,89 @@
+/* DeepNote 图标样式 - 企业级设计 */
+
+.dn-icon {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  line-height: 1;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.dn-icon::before {
+  display: inline-block;
+  font-family: 'weui-icon';
+  font-size: inherit;
+  font-style: normal;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* 拍照/相机图标 */
+.dn-icon-camera::before {
+  content: '\EA0E';
+}
+
+/* 书籍/学科图标 */
+.dn-icon-book::before {
+  content: '\EA11';
+}
+
+/* 数学/计算器图标 */
+.dn-icon-calculator::before {
+  content: '\EA12';
+}
+
+/* 设置图标 */
+.dn-icon-setting::before {
+  content: '\EA0D';
+}
+
+/* 裁剪图标 */
+.dn-icon-crop::before {
+  content: '\EA13';
+}
+
+/* 提示/灯泡图标 */
+.dn-icon-info::before {
+  content: '\EA06';
+}
+
+/* 编辑/笔记图标 */
+.dn-icon-edit::before {
+  content: '\EA14';
+}
+
+/* 成功/对勾图标 */
+.dn-icon-success::before {
+  content: '\EA08';
+  color: #09BB07;
+}
+
+/* 错误/叉号图标 */
+.dn-icon-cancel::before {
+  content: '\EA0B';
+  color: #E64340;
+}
+
+/* 收藏/星星图标（实心） */
+.dn-icon-star-filled::before {
+  content: '\EA15';
+  color: #FFB800;
+}
+
+/* 收藏/星星图标（空心） */
+.dn-icon-star::before {
+  content: '\EA16';
+  color: #FFB800;
+}
+
+/* 空状态图标 */
+.dn-icon-empty::before {
+  content: '\EA17';
+  color: #999;
+}
+
+/* 图片图标 */
+.dn-icon-image::before {
+  content: '\EA18';
+}

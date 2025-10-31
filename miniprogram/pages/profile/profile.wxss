@@ -7,12 +7,34 @@
 /* 用户信息卡片 */
 .user-card {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-radius: 16rpx;
+  border-radius: 24rpx;
   padding: 40rpx;
   display: flex;
   align-items: center;
   margin-bottom: 20rpx;
-  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.1);
+  box-shadow:
+    0 12rpx 32rpx rgba(102, 126, 234, 0.3),
+    inset 0 1rpx 3rpx rgba(255, 255, 255, 0.2);
+  border: 1rpx solid rgba(255, 255, 255, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+/* 添加光泽效果 */
+.user-card::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    45deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.1) 50%,
+    transparent 70%
+  );
+  pointer-events: none;
 }
 
 /* 头像按钮 */
@@ -113,11 +135,14 @@
 
 /* 学习数据卡片 */
 .stats-card {
-  background-color: #FFFFFF;
-  border-radius: 16rpx;
-  padding: 30rpx;
+  background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%);
+  border-radius: 24rpx;
+  padding: 32rpx;
   margin-bottom: 20rpx;
-  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.06);
+  box-shadow:
+    0 8rpx 24rpx rgba(0, 0, 0, 0.06),
+    inset 0 1rpx 2rpx rgba(255, 255, 255, 0.8);
+  border: 1rpx solid rgba(255, 255, 255, 0.9);
 }
 
 .card-title {
@@ -193,11 +218,14 @@
 
 /* 功能菜单 */
 .menu-section {
-  background-color: #FFFFFF;
-  border-radius: 16rpx;
+  background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%);
+  border-radius: 24rpx;
   overflow: hidden;
   margin-bottom: 20rpx;
-  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.06);
+  box-shadow:
+    0 8rpx 24rpx rgba(0, 0, 0, 0.06),
+    inset 0 1rpx 2rpx rgba(255, 255, 255, 0.8);
+  border: 1rpx solid rgba(255, 255, 255, 0.9);
 }
 
 .menu-item {
@@ -224,9 +252,27 @@
 }
 
 .menu-icon {
-  font-size: 48rpx;
+  width: 72rpx;
+  height: 72rpx;
+  font-size: 40rpx;
   margin-right: 20rpx;
   line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.12) 0%, rgba(118, 75, 162, 0.08) 100%);
+  box-shadow:
+    0 4rpx 16rpx rgba(102, 126, 234, 0.08),
+    inset 0 1rpx 3rpx rgba(255, 255, 255, 0.6);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.menu-item:active .menu-icon {
+  transform: scale(0.9);
+  box-shadow:
+    0 2rpx 8rpx rgba(102, 126, 234, 0.12),
+    inset 0 1rpx 3rpx rgba(255, 255, 255, 0.7);
 }
 
 .menu-title {

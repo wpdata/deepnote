@@ -1,0 +1,2 @@
+<!-- 图标组件 -->
+<view class="dn-icon dn-icon-{{type}} {{className}}" style="{{style}}"></view>

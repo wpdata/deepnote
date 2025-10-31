@@ -1,0 +1,185 @@
+/* ========================================
+   DeepNote 全局通用样式
+   包含: emoji图标样式、按钮样式、卡片样式等
+   ======================================== */
+
+/* ============ Emoji 图标通用样式 ============ */
+
+/* 基础 emoji 图标 - 圆形背景 */
+.emoji-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 88rpx;
+  height: 88rpx;
+  font-size: 48rpx;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.6) 100%);
+  box-shadow:
+    0 8rpx 24rpx rgba(0, 0, 0, 0.08),
+    inset 0 1rpx 3rpx rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10rpx);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.emoji-icon:active {
+  transform: scale(0.95);
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.12);
+}
+
+/* 小尺寸 emoji */
+.emoji-icon-sm {
+  width: 64rpx;
+  height: 64rpx;
+  font-size: 36rpx;
+}
+
+/* 大尺寸 emoji */
+.emoji-icon-lg {
+  width: 120rpx;
+  height: 120rpx;
+  font-size: 64rpx;
+  box-shadow:
+    0 12rpx 32rpx rgba(0, 0, 0, 0.1),
+    inset 0 2rpx 4rpx rgba(255, 255, 255, 0.8);
+}
+
+/* 特大尺寸 emoji */
+.emoji-icon-xl {
+  width: 160rpx;
+  height: 160rpx;
+  font-size: 88rpx;
+  box-shadow:
+    0 16rpx 48rpx rgba(0, 0, 0, 0.12),
+    inset 0 2rpx 6rpx rgba(255, 255, 255, 0.9);
+}
+
+/* ============ 彩色背景变体 ============ */
+
+/* 蓝色主题 (数学、理科) */
+.emoji-icon-blue {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  box-shadow:
+    0 8rpx 24rpx rgba(102, 126, 234, 0.3),
+    inset 0 1rpx 3rpx rgba(255, 255, 255, 0.3);
+}
+
+/* 绿色主题 (已掌握、正确) */
+.emoji-icon-green {
+  background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+  box-shadow:
+    0 8rpx 24rpx rgba(56, 239, 125, 0.3),
+    inset 0 1rpx 3rpx rgba(255, 255, 255, 0.3);
+}
+
+/* 橙色主题 (警告、待复习) */
+.emoji-icon-orange {
+  background: linear-gradient(135deg, #fa8231 0%, #ffd861 100%);
+  box-shadow:
+    0 8rpx 24rpx rgba(250, 130, 49, 0.3),
+    inset 0 1rpx 3rpx rgba(255, 255, 255, 0.3);
+}
+
+/* 红色主题 (错误、重要) */
+.emoji-icon-red {
+  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+  box-shadow:
+    0 8rpx 24rpx rgba(255, 107, 107, 0.3),
+    inset 0 1rpx 3rpx rgba(255, 255, 255, 0.3);
+}
+
+/* 紫色主题 (特殊功能) */
+.emoji-icon-purple {
+  background: linear-gradient(135deg, #a8c0ff 0%, #3f2b96 100%);
+  box-shadow:
+    0 8rpx 24rpx rgba(168, 192, 255, 0.3),
+    inset 0 1rpx 3rpx rgba(255, 255, 255, 0.3);
+}
+
+/* ============ 按钮样式 ============ */
+
+/* 主要按钮 */
+.btn-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff;
+  border-radius: 24rpx;
+  padding: 28rpx 48rpx;
+  font-size: 32rpx;
+  font-weight: 600;
+  border: none;
+  box-shadow: 0 8rpx 24rpx rgba(102, 126, 234, 0.3);
+  transition: all 0.3s;
+}
+
+.btn-primary:active {
+  transform: scale(0.98);
+  box-shadow: 0 4rpx 12rpx rgba(102, 126, 234, 0.4);
+}
+
+/* 次要按钮 */
+.btn-secondary {
+  background: #f5f5f5;
+  color: #333;
+  border-radius: 24rpx;
+  padding: 28rpx 48rpx;
+  font-size: 32rpx;
+  font-weight: 500;
+  border: 2rpx solid #e0e0e0;
+  transition: all 0.3s;
+}
+
+.btn-secondary:active {
+  transform: scale(0.98);
+  background: #e8e8e8;
+}
+
+/* ============ 卡片样式 ============ */
+
+/* 基础卡片 */
+.card {
+  background: #fff;
+  border-radius: 24rpx;
+  padding: 32rpx;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.06);
+  transition: all 0.3s;
+}
+
+.card:active {
+  transform: translateY(-2rpx);
+  box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.08);
+}
+
+/* 渐变卡片 */
+.card-gradient {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 24rpx;
+  padding: 32rpx;
+  box-shadow: 0 8rpx 32rpx rgba(102, 126, 234, 0.3);
+  color: #fff;
+}
+
+/* ============ 工具类 ============ */
+
+/* 毛玻璃效果 */
+.glass-effect {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(20rpx);
+  -webkit-backdrop-filter: blur(20rpx);
+}
+
+/* 柔和阴影 */
+.soft-shadow {
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.06);
+}
+
+/* 深色阴影 */
+.deep-shadow {
+  box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.12);
+}
+
+/* 圆角 */
+.rounded-sm { border-radius: 12rpx; }
+.rounded-md { border-radius: 16rpx; }
+.rounded-lg { border-radius: 24rpx; }
+.rounded-xl { border-radius: 32rpx; }
+.rounded-full { border-radius: 9999rpx; }

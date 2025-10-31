@@ -13,13 +13,22 @@
 
 .stat-card {
   flex: 1;
-  background-color: #FFFFFF;
+  background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%);
   border-radius: 24rpx;
   padding: 30rpx 20rpx;
-  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.06);
+  box-shadow:
+    0 8rpx 24rpx rgba(0, 0, 0, 0.06),
+    inset 0 1rpx 2rpx rgba(255, 255, 255, 0.8);
+  border: 1rpx solid rgba(255, 255, 255, 0.9);
   display: flex;
   flex-direction: column;
   align-items: center;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.stat-card:active {
+  transform: translateY(-2rpx);
+  box-shadow: 0 12rpx 32rpx rgba(0, 0, 0, 0.08);
 }
 
 .stat-label {
@@ -56,8 +65,24 @@
 }
 
 .action-icon {
-  font-size: 72rpx;
+  width: 96rpx;
+  height: 96rpx;
+  font-size: 52rpx;
   margin-right: 24rpx;
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 24rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(20rpx);
+  box-shadow:
+    0 8rpx 24rpx rgba(0, 0, 0, 0.15),
+    inset 0 2rpx 6rpx rgba(255, 255, 255, 0.4);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.action-card:active .action-icon {
+  transform: scale(0.95);
 }
 
 .action-info {
@@ -102,23 +127,62 @@
 .subject-card {
   border-radius: 24rpx;
   padding: 30rpx;
-  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.08);
+  box-shadow:
+    0 8rpx 24rpx rgba(0, 0, 0, 0.1),
+    inset 0 1rpx 3rpx rgba(255, 255, 255, 0.3);
+  border: 1rpx solid rgba(255, 255, 255, 0.4);
   display: flex;
   flex-direction: column;
   align-items: center;
-  transition: transform 0.3s;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   min-height: 280rpx;
+  position: relative;
+  overflow: hidden;
+}
+
+/* 为学科卡片添加微妙的光泽效果 */
+.subject-card::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    45deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.15) 50%,
+    transparent 70%
+  );
+  pointer-events: none;
 }
 
 .subject-card:active {
-  transform: scale(0.98);
+  transform: scale(0.96) translateY(2rpx);
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.15);
 }
 
 .subject-icon {
-  font-size: 120rpx;
+  width: 120rpx;
+  height: 120rpx;
+  font-size: 68rpx;
   margin-bottom: 20rpx;
   pointer-events: none; /* 防止阻止点击事件 */
   line-height: 1;
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow:
+    0 8rpx 24rpx rgba(0, 0, 0, 0.12),
+    inset 0 2rpx 6rpx rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(20rpx);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.subject-card:active .subject-icon {
+  transform: scale(0.9);
 }
 
 .subject-info {
