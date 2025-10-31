@@ -5,6 +5,7 @@
     "pages/scan/scan",
     "pages/math-check/math-check",
     "pages/error-detail/error-detail",
+    "pages/ai-chat/ai-chat",
     "pages/error-list/error-list",
     "pages/practice/practice",
     "pages/quick-practice/quick-practice",

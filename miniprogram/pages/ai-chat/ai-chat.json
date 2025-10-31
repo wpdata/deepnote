@@ -1,0 +1,7 @@
+{
+  "navigationBarTitleText": "AI互动讲解",
+  "navigationBarBackgroundColor": "#667eea",
+  "navigationBarTextStyle": "white",
+  "enablePullDownRefresh": false,
+  "usingComponents": {}
+}

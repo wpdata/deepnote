@@ -11,19 +11,28 @@ const DEEPSEEK_API_KEY = process.env.DEEPSEEK_API_KEY || ''
 
 /**
  * 调用 DeepSeek API
+ * 支持两种调用方式：
+ * 1. 简单模式：传入 prompt 参数
+ * 2. 对话模式：传入 messages 数组
+ *
+ * 支持的模型：
+ * - deepseek-chat: 通用对话模型
+ * - deepseek-reasoner: 推理模型（数学、逻辑推理能力更强）
  */
 exports.main = async (event, context) => {
   const {
     prompt,
-    model = 'deepseek-chat',
+    messages,
+    model = 'deepseek-chat',  // 可选: deepseek-chat, deepseek-reasoner
     maxTokens = 500,
     temperature = 0.7
   } = event
 
-  if (!prompt) {
+  // 验证参数
+  if (!prompt && !messages) {
     return {
       success: false,
-      error: '缺少必要参数: prompt'
+      error: '缺少必要参数: prompt 或 messages'
     }
   }
 
@@ -37,14 +46,21 @@ exports.main = async (event, context) => {
   try {
     console.log('调用 DeepSeek API:', model)
 
-    const requestData = {
-      model: model,
-      messages: [
+    // 构建消息列表
+    let messagesList = messages
+    if (!messagesList) {
+      // 简单模式：将 prompt 转为 messages 格式
+      messagesList = [
         {
           role: 'user',
           content: prompt
         }
-      ],
+      ]
+    }
+
+    const requestData = {
+      model: model,
+      messages: messagesList,
       max_tokens: maxTokens,
       temperature: temperature
     }

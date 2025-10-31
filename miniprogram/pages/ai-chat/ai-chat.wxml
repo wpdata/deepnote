@@ -1,0 +1,113 @@
+<view class="container">
+  <!-- 对话区域 -->
+  <scroll-view class="chat-area" scroll-y scroll-into-view="{{scrollIntoView}}" scroll-with-animation>
+    <!-- 题目卡片（固定在顶部） -->
+    <view class="question-card">
+      <view class="card-header">
+        <view class="subject-badge">{{question.subject}}</view>
+        <view class="knowledge-badge">{{question.knowledgePoint}}</view>
+      </view>
+
+      <view class="question-content-box">
+        <text class="content-label">题目内容</text>
+        <text class="content-text">{{question.content || '加载中...'}}</text>
+      </view>
+
+      <image wx:if="{{question.imageUrl}}" class="question-img" src="{{question.imageUrl}}" mode="widthFix"></image>
+    </view>
+
+    <!-- 欢迎消息 -->
+    <view wx:if="{{messages.length === 0}}" class="welcome-msg">
+      <text class="ai-avatar-emoji">🤖</text>
+      <text class="welcome-title">AI老师在线</text>
+      <text class="welcome-text">我会根据这道题来回答你的问题，有什么不懂的尽管问我～</text>
+    </view>
+
+    <!-- 消息列表 -->
+    <view wx:for="{{messages}}" wx:key="index" id="msg-{{index}}" class="message-item {{item.role}}">
+      <!-- 用户消息 -->
+      <view wx:if="{{item.role === 'user'}}" class="user-message">
+        <view class="message-bubble">
+          <text class="message-text">{{item.content}}</text>
+        </view>
+        <view class="avatar user-avatar-placeholder">👤</view>
+      </view>
+
+      <!-- AI消息 -->
+      <view wx:else class="ai-message">
+        <view class="avatar ai-avatar-emoji">🤖</view>
+        <view class="message-bubble">
+          <!-- 思考中 -->
+          <view wx:if="{{item.isThinking}}" class="thinking">
+            <text class="thinking-text">{{item.content}}</text>
+            <view class="thinking-dots">
+              <text class="dot">.</text>
+              <text class="dot">.</text>
+              <text class="dot">.</text>
+            </view>
+          </view>
+
+          <!-- 正常消息 -->
+          <view wx:else>
+            <text class="message-text">{{item.content}}</text>
+
+            <!-- 语音播放按钮 -->
+            <view wx:if="{{item.hasVoice}}" class="voice-btn" bindtap="playVoice" data-file-id="{{item.voiceFileID}}" data-index="{{index}}">
+              <image class="voice-icon" src="/images/{{currentPlayingId === index && isPlaying ? 'pause' : 'play'}}.png" mode="aspectFit"></image>
+              <text class="voice-text">{{currentPlayingId === index && isPlaying ? '暂停' : '播放'}}</text>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 占位元素（用于滚动） -->
+    <view style="height: 20px;"></view>
+  </scroll-view>
+
+  <!-- 底部输入区 -->
+  <view class="input-area">
+    <!-- 语音回复开关 -->
+    <view class="voice-switch-bar">
+      <view class="switch-item" bindtap="toggleVoiceOutput">
+        <text class="switch-icon">{{voiceOutputEnabled ? '🔊' : '🔇'}}</text>
+        <text class="switch-text">{{voiceOutputEnabled ? 'AI语音回复' : 'AI文字回复'}}</text>
+      </view>
+    </view>
+
+    <!-- 输入框区域 -->
+    <view class="input-box">
+      <!-- 左侧：语音/键盘图标 -->
+      <view class="voice-icon-btn" bindtap="toggleInputMode">
+        <text class="wave-icon">{{inputMode === 'voice' ? '⌨️' : '🎤'}}</text>
+      </view>
+
+      <!-- 中间：输入框或语音按钮 -->
+      <view class="input-wrapper">
+        <!-- 语音模式 -->
+        <button
+          wx:if="{{inputMode === 'voice'}}"
+          class="voice-press-btn {{isRecording ? 'recording' : ''}}"
+          bindtouchstart="startRecording"
+          bindtouchend="stopRecording"
+        >
+          {{isRecording ? '松开 发送' : '按住 说话'}}
+        </button>
+
+        <!-- 文字模式 -->
+        <input
+          wx:else
+          class="text-input"
+          value="{{inputValue}}"
+          bindinput="onInputChange"
+          placeholder="输入消息..."
+          confirm-type="send"
+          bindconfirm="sendTextMessage"
+          adjust-position="{{true}}"
+        />
+      </view>
+
+      <!-- 发送按钮已移除，使用键盘发送键 -->
+    </view>
+  </view>
+</view>

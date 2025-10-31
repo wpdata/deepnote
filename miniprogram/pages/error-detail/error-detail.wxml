@@ -54,8 +54,8 @@
   <!-- AI 分析卡片 -->
   <view class="analysis-card">
     <view class="card-title">
-      <image class="ai-icon" src="/images/ai.png" mode="aspectFit"></image>
-      <text>AI 智能分析 (DeepSeek)</text>
+      <text class="ai-icon-emoji">🤖</text>
+      <text>AI 智能分析</text>
     </view>
 
     <view class="analysis-section">
@@ -75,13 +75,14 @@
 
   <!-- 底部操作按钮 -->
   <view class="bottom-actions">
+    <button class="action-btn ai-chat" bindtap="openAIChat">
+      💬 向AI提问
+    </button>
     <button class="action-btn secondary" bindtap="startPractice">
-      <image class="btn-icon" src="/images/practice.png" mode="aspectFit"></image>
-      强化练习
+      📝 强化练习
     </button>
     <button class="action-btn primary {{question.mastered ? 'mastered' : ''}}" bindtap="toggleMastered">
-      <image class="btn-icon" src="/images/{{question.mastered ? 'check' : 'uncheck'}}.png" mode="aspectFit"></image>
-      {{question.mastered ? '已掌握' : '标记已掌握'}}
+      {{question.mastered ? '✓ 已掌握' : '标记已掌握'}}
     </button>
   </view>
 </view>

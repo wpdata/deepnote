@@ -187,10 +187,10 @@
   margin-bottom: 24rpx;
 }
 
-.ai-icon {
-  width: 40rpx;
-  height: 40rpx;
+.ai-icon-emoji {
+  font-size: 40rpx;
   margin-right: 12rpx;
+  line-height: 1;
 }
 
 .analysis-section {
@@ -261,8 +261,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 28rpx;
+  font-size: 24rpx;
   border: none;
+  white-space: nowrap;
 }
 
 .action-btn.primary {
@@ -272,6 +273,12 @@
 
 .action-btn.primary.mastered {
   background-color: #52C41A;
+}
+
+.action-btn.ai-chat {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #FFFFFF;
+  font-weight: 500;
 }
 
 .action-btn.secondary {

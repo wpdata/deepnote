@@ -113,8 +113,8 @@
 }
 
 .option-item.correct {
-  background-color: #F6FFED;
-  border-color: #52C41A;
+  background-color: #F5F5F5;
+  border-color: transparent;
 }
 
 .option-item.wrong {
@@ -143,8 +143,8 @@
 }
 
 .option-item.correct .option-label {
-  background-color: #52C41A;
-  color: #FFFFFF;
+  background-color: #FFFFFF;
+  color: #666;
 }
 
 .option-item.wrong .option-label {
@@ -159,10 +159,8 @@
   line-height: 1.6;
 }
 
-.result-icon {
-  width: 40rpx;
-  height: 40rpx;
-  margin-left: 12rpx;
+.result-emoji {
+  display: none;
 }
 
 .result-section {

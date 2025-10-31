@@ -149,6 +149,12 @@ Page({
     }
   },
 
+  openAIChat() {
+    wx.navigateTo({
+      url: `/pages/ai-chat/ai-chat?errorId=${this.data.questionId}`
+    })
+  },
+
   startPractice() {
     wx.navigateTo({
       url: `/pages/practice/practice?subject=${this.data.question.subject}&knowledgePoint=${this.data.question.knowledgePoint}`
