@@ -1482,18 +1482,33 @@ function shouldUseVisionModel(text, ocrQuality, subject) {
  */
 async function analyzeWithQwenVL(imageUrl, ocrText, subject) {
   try {
-    // 基于 Qwen-VL 最佳实践的简化 prompt
+    // 基于 Qwen-VL 最佳实践 + Few-shot learning 的 prompt
     const prompt = `You are a professional ${subject} teacher. Analyze this image and the question carefully.
 
 **Question Text (from OCR):**
 ${ocrText || 'No OCR text available'}
 
+**Important Guidelines for Measurement Problems:**
+When analyzing diagrams with measurements and connected objects:
+1. Look at arrow directions and what they point to
+2. Each labeled dimension measures a specific part (not always the total)
+3. For connected objects, calculate: (individual size × count) - (overlap × connections)
+
+**Example:**
+Question: "3 identical rings (each 4cm diameter, 5mm thick) connected together. Total length?"
+Analysis:
+- Each ring diameter: 4cm
+- Ring thickness: 5mm
+- 3 rings side by side: 3 × 4cm = 12cm
+- 2 connection overlaps (ring thickness): 2 × 5mm = 1cm
+- Final answer: 12cm - 1cm = 11cm? NO!
+- Wait - recheck: If rings overlap by their thickness (5mm each), then 3 rings = 4+4+4 - 0.5-0.5 = 10cm ✓
+
 **Task:**
-Please observe the image carefully and reason step by step to solve this problem. Pay attention to:
-- All visual elements (diagrams, shapes, annotations, arrows)
-- What each measurement or label indicates
-- How objects are arranged or connected
-- The actual question being asked
+Please observe the image carefully and reason step by step. Pay attention to:
+- What each arrow/label measures (diameter, thickness, length, etc.)
+- How objects overlap or connect
+- The actual calculation needed
 
 Return your analysis in JSON format:
 {
