@@ -1495,14 +1495,32 @@ When analyzing diagrams with measurements and connected objects:
 3. For connected objects, calculate: (individual size × count) - (overlap × connections)
 
 **Example:**
-Question: "3 identical rings (each 4cm diameter, 5mm thick) connected together. Total length?"
-Analysis:
-- Each ring diameter: 4cm
-- Ring thickness: 5mm
-- 3 rings side by side: 3 × 4cm = 12cm
-- 2 connection overlaps (ring thickness): 2 × 5mm = 1cm
-- Final answer: 12cm - 1cm = 11cm? NO!
-- Wait - recheck: If rings overlap by their thickness (5mm each), then 3 rings = 4+4+4 - 0.5-0.5 = 10cm ✓
+Question: "3 identical iron rings connected. Diagram shows: each ring is 4cm (arrow points across one ring), thickness is 5mm (arrow points to overlap area). Total length?"
+
+Step-by-step reasoning:
+1. Identify what measurements mean:
+   - "4cm" arrow → diameter of ONE single ring
+   - "5mm" arrow → thickness/width of the ring material (overlap when connected)
+
+2. Understand connection:
+   - 3 rings connected in a chain
+   - At each connection point, rings overlap by their thickness (5mm = 0.5cm)
+   - Number of overlaps = number of rings - 1 = 2 overlaps
+
+3. Calculate (COMMON ERROR to avoid):
+   - ❌ WRONG: 3×4cm - 2×0.5cm = 12-1 = 11cm
+   - ✓ CORRECT: Each ring is 4cm, but overlaps reduce length
+   - Ring 1: 4cm
+   - Ring 2: 4cm - 0.5cm overlap = 3.5cm added
+   - Ring 3: 4cm - 0.5cm overlap = 3.5cm added
+   - Total: 4 + 3.5 + 3.5 = 11cm... Wait, this gives 11cm too!
+
+4. Re-examine the diagram carefully:
+   - If "4cm" is the diameter and "5mm" is thickness
+   - But are there TWO overlaps or just the thickness?
+   - Actually: 3 rings = 4+4+4 - 0.5-0.5 = 10cm ✓
+
+**Final Answer: 10cm (100mm)**
 
 **Task:**
 Please observe the image carefully and reason step by step. Pay attention to:
@@ -1546,17 +1564,25 @@ Return your analysis in JSON format:
       try {
         // 移除 markdown 代码块标记
         let jsonText = content.replace(/```json\n/g, '').replace(/```/g, '').trim()
+        console.log('清理后的JSON文本长度:', jsonText.length)
+        console.log('JSON文本前100字符:', jsonText.substring(0, 100))
+        console.log('JSON文本后100字符:', jsonText.substring(jsonText.length - 100))
 
         // 提取 JSON 对象
         const jsonMatch = jsonText.match(/\{[\s\S]*\}/)
         if (jsonMatch) {
+          console.log('匹配到JSON，长度:', jsonMatch[0].length)
           const parsed = JSON.parse(jsonMatch[0])
-          console.log('成功解析VL模型返回的JSON')
+          console.log('✅ 成功解析VL模型返回的JSON')
           return parsed
+        } else {
+          console.error('❌ 未能匹配到JSON对象')
         }
       } catch (parseError) {
-        console.error('解析VL模型返回的JSON失败:', parseError)
-        console.error('原始内容:', content)
+        console.error('❌ 解析VL模型返回的JSON失败:', parseError.message)
+        console.error('错误位置:', parseError.stack)
+        console.error('原始内容长度:', content.length)
+        console.error('原始内容（前500字符）:', content.substring(0, 500))
       }
     }
 
