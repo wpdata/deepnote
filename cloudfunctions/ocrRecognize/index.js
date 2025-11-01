@@ -1495,32 +1495,29 @@ When analyzing diagrams with measurements and connected objects:
 3. For connected objects, calculate: (individual size × count) - (overlap × connections)
 
 **Example:**
-Question: "3 identical iron rings connected. Diagram shows: each ring is 4cm (arrow points across one ring), thickness is 5mm (arrow points to overlap area). Total length?"
+Question: "3 identical iron rings connected. Diagram shows: each ring is 4cm (arrow points across one ring), thickness is 5mm (arrow points to ring thickness). Total length?"
 
 Step-by-step reasoning:
 1. Identify what measurements mean:
    - "4cm" arrow → diameter of ONE single ring
-   - "5mm" arrow → thickness/width of the ring material (overlap when connected)
+   - "5mm" arrow → thickness of the ring material itself
 
 2. Understand connection:
    - 3 rings connected in a chain
-   - At each connection point, rings overlap by their thickness (5mm = 0.5cm)
-   - Number of overlaps = number of rings - 1 = 2 overlaps
+   - At EACH connection point, BOTH rings contribute their thickness to the overlap
+   - Connection 1 (between ring 1&2): ring1's right side (0.5cm) + ring2's left side (0.5cm) overlap
+   - Connection 2 (between ring 2&3): ring2's right side (0.5cm) + ring3's left side (0.5cm) overlap
+   - Total thickness to subtract: 4 sides × 0.5cm = 2cm
 
 3. Calculate (COMMON ERROR to avoid):
-   - ❌ WRONG: 3×4cm - 2×0.5cm = 12-1 = 11cm
-   - ✓ CORRECT: Each ring is 4cm, but overlaps reduce length
-   - Ring 1: 4cm
-   - Ring 2: 4cm - 0.5cm overlap = 3.5cm added
-   - Ring 3: 4cm - 0.5cm overlap = 3.5cm added
-   - Total: 4 + 3.5 + 3.5 = 11cm... Wait, this gives 11cm too!
-
-4. Re-examine the diagram carefully:
-   - If "4cm" is the diameter and "5mm" is thickness
-   - But are there TWO overlaps or just the thickness?
-   - Actually: 3 rings = 4+4+4 - 0.5-0.5 = 10cm ✓
+   - ❌ WRONG: 3×4 - 2×0.5 = 12-1 = 11cm (only counting 2 thicknesses)
+   - ✓ CORRECT: 4 + 4 + 4 - 0.5 - 0.5 - 0.5 - 0.5 = 12 - 2 = 10cm
+   - Each connection removes TWO thicknesses (one from each ring)
+   - 2 connections × 2 thicknesses = 4 thicknesses total to subtract
 
 **Final Answer: 10cm (100mm)**
+
+Key insight: At each connection, the thickness of BOTH connecting rings overlaps, so you subtract 2×thickness per connection, not just 1×thickness.
 
 **Task:**
 Please observe the image carefully and reason step by step. Pay attention to:
