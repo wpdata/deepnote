@@ -1446,7 +1446,7 @@ function shouldUseVisionModel(text, ocrQuality, subject) {
   }
 
   // 3. 明确的图形题特征（必须同时满足关键词+短文本）
-  const hasStrongImageIndicators = /如图所示|根据图|观察图|看图|下图是|右图为|图中|示意图/.test(text)
+  const hasStrongImageIndicators = /如图所示|如下图|根据图|观察图|看图|下图是|下图:|右图为|图中|示意图|见图/.test(text)
   if (hasStrongImageIndicators) {
     console.log('✓ 需要VL: 明确的图形题标识')
     return true
@@ -1482,28 +1482,30 @@ function shouldUseVisionModel(text, ocrQuality, subject) {
  */
 async function analyzeWithQwenVL(imageUrl, ocrText, subject) {
   try {
-    const prompt = `你是一位专业的${subject}老师。
+    // 基于 Qwen-VL 最佳实践的简化 prompt
+    const prompt = `You are a professional ${subject} teacher. Analyze this image and the question carefully.
 
-请仔细分析这道题目:
-${ocrText ? 'OCR识别文字(可能不完整): ' + ocrText : ''}
+**Question Text (from OCR):**
+${ocrText || 'No OCR text available'}
 
-请根据图片完整分析这道题，并返回以下JSON格式:
+**Task:**
+Please observe the image carefully and reason step by step to solve this problem. Pay attention to:
+- All visual elements (diagrams, shapes, annotations, arrows)
+- What each measurement or label indicates
+- How objects are arranged or connected
+- The actual question being asked
+
+Return your analysis in JSON format:
 {
-  "formattedText": "完整的题目内容（50-200字）",
-  "subject": "学科（数学/语文/英语/物理/化学/生物）",
-  "knowledgePoint": "具体知识点名称",
-  "difficulty": "难度（简单/中等/困难）",
-  "questionType": "题型（选择题/填空题/解答题/应用题/计算题等）",
-  "userAnswer": "学生答案（如果图片中有手写答案）",
-  "correctAnswer": "标准答案或正确解法",
-  "aiAnalysis": "详细的解题分析和易错点提示（100-200字）"
-}
-
-注意：
-1. formattedText 要完整描述题目，包括图形信息
-2. 如果能从图片中识别学生的手写答案，填入 userAnswer
-3. correctAnswer 要给出详细的解题步骤
-4. aiAnalysis 要针对这道具体题目，不要使用模板化语言`
+  "formattedText": "Complete question description including image details",
+  "subject": "Subject area",
+  "knowledgePoint": "Key concept being tested",
+  "difficulty": "Easy/Medium/Hard",
+  "questionType": "Problem type",
+  "userAnswer": "Student's answer if present",
+  "correctAnswer": "Correct answer with unit",
+  "aiAnalysis": "Step-by-step reasoning: what you observe → how you solve → final answer"
+}`
 
     const result = await cloud.callFunction({
       name: 'callQwenVL',
