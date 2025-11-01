@@ -1528,7 +1528,8 @@ Return your analysis in JSON format:
         imageUrl: imageUrl,
         prompt: prompt,
         model: 'qwen-vl-max'
-      }
+      },
+      timeout: 60000  // 60秒超时（毫秒）
     })
 
     if (result.result && result.result.success) {
