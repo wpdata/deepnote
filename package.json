@@ -1,6 +1,6 @@
 {
   "name": "deepnote",
-  "version": "0.3.0",
+  "version": "2.0.5",
   "description": "智能错题本 - DeepNote",
   "scripts": {
     "register-admin": "node scripts/register-admin.js"
