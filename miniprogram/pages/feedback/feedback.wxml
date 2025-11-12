@@ -33,17 +33,6 @@
       <text class="char-count">{{content.length}} 字</text>
     </view>
 
-    <!-- 联系方式(可选) -->
-    <view class="form-item">
-      <text class="form-label">联系方式 (可选)</text>
-      <input
-        class="input"
-        placeholder="请留下您的联系方式，方便我们回复"
-        value="{{contact}}"
-        bindinput="onContactInput"
-      />
-    </view>
-
     <!-- 提交按钮 -->
     <button class="submit-btn" bindtap="onSubmit" disabled="{{submitting}}">
       {{submitting ? '提交中...' : '提交反馈'}}

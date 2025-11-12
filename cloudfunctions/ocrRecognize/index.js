@@ -389,30 +389,46 @@ async function recognizeAndFormatQuestion(imageData, fileID) {
     // 如果需要VL模型，调用视觉分析
     if (needsVisionModel) {
       console.log('检测到需要视觉模型，调用 Qwen3-VL 进行图片分析')
-      try {
-        const visionResult = await analyzeWithQwenVL(imageUrl, rawText, preliminarySubject)
-        if (visionResult) {
-          return {
-            success: true,
-            rawText: rawText,
-            formattedText: visionResult.formattedText || rawText,
-            userAnswer: visionResult.userAnswer || '',
-            correctAnswer: visionResult.correctAnswer || '',
-            mathCalculated: false,
-            aiModel: 'qwen-vl-max',  // 标识使用VL模型
-            ocrQuality: ocrQuality,
-            aiAnalysis: {
-              subject: visionResult.subject || '未分类',
-              knowledgePoint: visionResult.knowledgePoint || '待标注',
-              difficulty: visionResult.difficulty || '中等',
-              questionType: visionResult.questionType || '未知',
-              analysis: visionResult.aiAnalysis || ''
-            }
+
+      // 重试最多2次
+      let visionResult = null
+      for (let attempt = 1; attempt <= 2; attempt++) {
+        try {
+          console.log(`VL模型调用尝试 ${attempt}/2`)
+          visionResult = await analyzeWithQwenVL(imageUrl, rawText, preliminarySubject)
+          if (visionResult) {
+            console.log(`✅ VL模型第 ${attempt} 次尝试成功`)
+            break
+          }
+        } catch (visionError) {
+          console.error(`VL模型第 ${attempt} 次尝试失败:`, visionError.message)
+          if (attempt < 2) {
+            console.log('等待2秒后重试...')
+            await new Promise(resolve => setTimeout(resolve, 2000))
           }
         }
-      } catch (visionError) {
-        console.error('VL模型调用失败，降级到标准流程:', visionError)
-        // 继续使用标准流程
+      }
+
+      if (visionResult) {
+        return {
+          success: true,
+          rawText: rawText,
+          formattedText: visionResult.formattedText || rawText,
+          userAnswer: visionResult.userAnswer || '',
+          correctAnswer: visionResult.correctAnswer || '',
+          mathCalculated: false,
+          aiModel: 'qwen-vl-max',  // 标识使用VL模型
+          ocrQuality: ocrQuality,
+          aiAnalysis: {
+            subject: visionResult.subject || '未分类',
+            knowledgePoint: visionResult.knowledgePoint || '待标注',
+            difficulty: visionResult.difficulty || '中等',
+            questionType: visionResult.questionType || '未知',
+            analysis: visionResult.aiAnalysis || ''
+          }
+        }
+      } else {
+        console.log('⚠️ VL模型重试2次后仍失败，降级到标准流程')
       }
     }
 
@@ -1445,17 +1461,17 @@ function shouldUseVisionModel(text, ocrQuality, subject) {
     return true
   }
 
-  // 3. 明确的图形题特征（必须同时满足关键词+短文本）
-  const hasStrongImageIndicators = /如图所示|如下图|根据图|观察图|看图|下图是|下图:|右图为|图中|示意图|见图/.test(text)
+  // 3. 明确的图形题特征
+  const hasStrongImageIndicators = /如图|如图所示|如下图|根据图|观察图|看图|下图|下图是|下图:|右图|右图为|图中|示意图|见图/.test(text)
   if (hasStrongImageIndicators) {
     console.log('✓ 需要VL: 明确的图形题标识')
     return true
   }
 
-  // 4. 几何图形题（包含图形关键词）
-  const hasGeometryKeywords = /画出|画一个|作出|连线|匹配图片|配对|连一连/.test(text)
+  // 4. 几何图形题（包含图形关键词或摆放、拼接等操作）
+  const hasGeometryKeywords = /画出|画一个|作出|连线|匹配图片|配对|连一连|摆成|拼成|拼接|组合图形|叠加|重叠/.test(text)
   if (hasGeometryKeywords) {
-    console.log('✓ 需要VL: 需要绘图或配对')
+    console.log('✓ 需要VL: 需要看图理解几何结构')
     return true
   }
 
@@ -1482,70 +1498,42 @@ function shouldUseVisionModel(text, ocrQuality, subject) {
  */
 async function analyzeWithQwenVL(imageUrl, ocrText, subject) {
   try {
-    // 基于 Qwen-VL 最佳实践 + Few-shot learning 的 prompt
-    const prompt = `You are a professional ${subject} teacher. Analyze this image and the question carefully.
+    // 精简的 prompt，减少 token 消耗，提升响应速度
+    const prompt = `请用中文分析这道${subject}题目和图片。
 
-**Question Text (from OCR):**
-${ocrText || 'No OCR text available'}
+OCR识别的文本：${ocrText || '无文本'}
 
-**Important Guidelines for Measurement Problems:**
-When analyzing diagrams with measurements and connected objects:
-1. Look at arrow directions and what they point to
-2. Each labeled dimension measures a specific part (not always the total)
-3. For connected objects, calculate: (individual size × count) - (overlap × connections)
+重要要求：
+1. 仔细观察图片中的所有数字、标注和手写计算过程
+2. 不要假设 - 根据实际看到的内容推导关系
+3. 学生的答案可能是正确的 - 请验证
+4. 保持分析简洁（最多100字）
 
-**Example:**
-Question: "3 identical iron rings connected. Diagram shows: each ring is 4cm (arrow points across one ring), thickness is 5mm (arrow points to ring thickness). Total length?"
-
-Step-by-step reasoning:
-1. Identify what measurements mean:
-   - "4cm" arrow → diameter of ONE single ring
-   - "5mm" arrow → thickness of the ring material itself
-
-2. Understand connection:
-   - 3 rings connected in a chain
-   - At EACH connection point, BOTH rings contribute their thickness to the overlap
-   - Connection 1 (between ring 1&2): ring1's right side (0.5cm) + ring2's left side (0.5cm) overlap
-   - Connection 2 (between ring 2&3): ring2's right side (0.5cm) + ring3's left side (0.5cm) overlap
-   - Total thickness to subtract: 4 sides × 0.5cm = 2cm
-
-3. Calculate (COMMON ERROR to avoid):
-   - ❌ WRONG: 3×4 - 2×0.5 = 12-1 = 11cm (only counting 2 thicknesses)
-   - ✓ CORRECT: 4 + 4 + 4 - 0.5 - 0.5 - 0.5 - 0.5 = 12 - 2 = 10cm
-   - Each connection removes TWO thicknesses (one from each ring)
-   - 2 connections × 2 thicknesses = 4 thicknesses total to subtract
-
-**Final Answer: 10cm (100mm)**
-
-Key insight: At each connection, the thickness of BOTH connecting rings overlaps, so you subtract 2×thickness per connection, not just 1×thickness.
-
-**Task:**
-Please observe the image carefully and reason step by step. Pay attention to:
-- What each arrow/label measures (diameter, thickness, length, etc.)
-- How objects overlap or connect
-- The actual calculation needed
-
-Return your analysis in JSON format:
+返回完整的JSON（确保以 } 结尾）：
 {
-  "formattedText": "Complete question description including image details",
-  "subject": "Subject area",
-  "knowledgePoint": "Key concept being tested",
-  "difficulty": "Easy/Medium/Hard",
-  "questionType": "Problem type",
-  "userAnswer": "Student's answer if present",
-  "correctAnswer": "Correct answer with unit",
-  "aiAnalysis": "Step-by-step reasoning: what you observe → how you solve → final answer"
+  "formattedText": "题目 + 图片简要描述（最多20字）",
+  "subject": "学科名称（如：数学、语文、英语等）",
+  "knowledgePoint": "知识点",
+  "difficulty": "简单/中等/困难",
+  "questionType": "题型",
+  "userAnswer": "学生在图片中写的答案",
+  "correctAnswer": "正确答案（带单位）",
+  "aiAnalysis": "简洁分析（最多50字）：关键观察 → 解题方法 → 最终答案"
 }`
 
+    console.log('开始调用 callQwenVL 云函数...')
     const result = await cloud.callFunction({
       name: 'callQwenVL',
       data: {
         imageUrl: imageUrl,
         prompt: prompt,
-        model: 'qwen-vl-max'
+        model: 'qwen-vl-max',
+        maxTokens: 800  // 800 tokens 足够返回简洁的分析
       },
-      timeout: 60000  // 60秒超时（毫秒）
+      timeout: 100000  // 100秒超时（毫秒），给 VL 模型足够时间
     })
+
+    console.log('callQwenVL 返回结果:', JSON.stringify(result, null, 2))
 
     if (result.result && result.result.success) {
       let content = result.result.content
@@ -1581,11 +1569,19 @@ Return your analysis in JSON format:
         console.error('原始内容长度:', content.length)
         console.error('原始内容（前500字符）:', content.substring(0, 500))
       }
+    } else {
+      // callQwenVL 调用失败或返回格式不正确
+      console.error('❌ callQwenVL 调用失败或返回错误')
+      console.error('完整返回:', JSON.stringify(result, null, 2))
+      if (result.result && result.result.error) {
+        console.error('错误信息:', result.result.error)
+      }
     }
 
     return null
   } catch (error) {
-    console.error('调用 Qwen3-VL 失败:', error)
+    console.error('❌ 调用 Qwen3-VL 异常:', error.message)
+    console.error('异常堆栈:', error.stack)
     return null
   }
 }

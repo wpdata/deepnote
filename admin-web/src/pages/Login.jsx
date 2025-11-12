@@ -32,6 +32,19 @@ const Login = () => {
 
       console.log('登录状态:', loginState)
 
+      // 开发模式：直接通过，不验证管理员权限
+      if (import.meta.env.DEV) {
+        console.log('开发模式：跳过管理员权限验证')
+        setIsAdmin(true)
+        setUserInfo({ nickName: '开发者' })
+        message.success('开发模式登录成功！')
+        setTimeout(() => {
+          navigate('/')
+        }, 500)
+        return
+      }
+
+      // 生产模式：验证管理员权限
       // 3. 调用云函数验证是否是管理员
       // 从 localStorage 读取 openId（需要手动设置）
       const adminOpenId = localStorage.getItem('adminOpenId')

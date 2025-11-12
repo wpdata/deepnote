@@ -9,7 +9,9 @@ import {
   UserOutlined,
   LogoutOutlined,
   MenuFoldOutlined,
-  MenuUnfoldOutlined
+  MenuUnfoldOutlined,
+  TeamOutlined,
+  ExclamationCircleOutlined
 } from '@ant-design/icons'
 import { Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { logout } from '../utils/cloudbase'
@@ -46,6 +48,16 @@ const MainLayout = () => {
       key: '/statistics',
       icon: <BarChartOutlined />,
       label: '统计分析',
+    },
+    {
+      key: '/users',
+      icon: <TeamOutlined />,
+      label: '用户管理',
+    },
+    {
+      key: '/errors',
+      icon: <ExclamationCircleOutlined />,
+      label: '错题管理',
     },
     {
       key: '/logs',

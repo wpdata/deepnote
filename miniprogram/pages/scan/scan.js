@@ -53,20 +53,19 @@ Page({
     wx.chooseMedia({
       count: 1,
       mediaType: ['image'],
-      sourceType: ['camera'],  // 只选择相机
+      sourceType: ['album', 'camera'],  // 支持相册和相机
       camera: 'back',  // 使用后置摄像头
       success: (res) => {
-        console.log('拍照成功:', res.tempFiles[0].tempFilePath)
+        console.log('选择图片成功:', res.tempFiles[0].tempFilePath)
         this.setData({
-          imageUrl: res.tempFiles[0].tempFilePath,
-          cameraMode: false
+          imageUrl: res.tempFiles[0].tempFilePath
         })
         this.startRecognition()
       },
       fail: (err) => {
-        console.error('打开相机失败:', err)
+        console.error('选择图片失败:', err)
         wx.showToast({
-          title: '打开相机失败',
+          title: '选择图片失败',
           icon: 'none'
         })
       }

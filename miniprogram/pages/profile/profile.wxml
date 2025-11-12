@@ -88,6 +88,6 @@
 
   <!-- 版本信息 -->
   <view class="version-info">
-    <text class="version-text">版本 2.0.5</text>
+    <text class="version-text">版本 2.0.6</text>
   </view>
 </view>

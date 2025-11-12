@@ -75,16 +75,18 @@ exports.main = async (event, context) => {
     if (openIds.length > 0) {
       const usersResult = await db.collection('users')
         .where({
-          openId: _.in(openIds)
+          _openid: _.in(openIds)
         })
         .field({
+          _openid: true,
           openId: true,
           nickName: true
         })
         .get();
 
       usersResult.data.forEach(user => {
-        usersMap[user.openId] = user;
+        const userId = user.openId || user._openid;
+        usersMap[userId] = user;
       });
     }
 
@@ -95,7 +97,7 @@ exports.main = async (event, context) => {
       return {
         id: error._id,
         userId: error._openid,
-        userName: user.nickName || '未知用户',
+        userName: user.nickName || error._openid?.substring(0, 8) + '...' || '未知用户',
         userOpenId: error._openid || '',
         actionType: '错题录入',
         subject: error.subject || '未分类',

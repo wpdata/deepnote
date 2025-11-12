@@ -77,7 +77,13 @@ exports.main = async (event, context) => {
       }
     }
 
+    console.log('准备调用通义千问 API，开始计时...')
+    const startTime = Date.now()
+
     const result = await callQwenAPI(requestData)
+
+    const elapsed = Date.now() - startTime
+    console.log(`API 调用完成，耗时: ${elapsed}ms`)
 
     if (result && result.output && result.output.choices) {
       let content = result.output.choices[0].message.content
@@ -115,7 +121,9 @@ exports.main = async (event, context) => {
  */
 function callQwenAPI(data) {
   return new Promise((resolve, reject) => {
+    console.log('📡 callQwenAPI 开始执行')
     const postData = JSON.stringify(data)
+    console.log('📦 请求数据大小:', Buffer.byteLength(postData), 'bytes')
 
     const options = {
       hostname: 'dashscope.aliyuncs.com',
@@ -129,33 +137,50 @@ function callQwenAPI(data) {
       }
     }
 
+    console.log('🔗 创建 HTTPS 请求...')
     const req = https.request(options, (res) => {
+      console.log('📥 收到响应，状态码:', res.statusCode)
       let responseData = ''
 
       res.on('data', (chunk) => {
         responseData += chunk
+        console.log('📨 接收数据块，当前总大小:', responseData.length, 'bytes')
       })
 
       res.on('end', () => {
+        console.log('✅ 响应接收完成，总大小:', responseData.length, 'bytes')
         try {
           const result = JSON.parse(responseData)
 
           if (res.statusCode === 200) {
+            console.log('✅ Qwen-VL API 调用成功')
             resolve(result)
           } else {
+            console.error('❌ Qwen-VL API 返回错误:', result.message || responseData)
             reject(new Error(`API错误: ${result.message || responseData}`))
           }
         } catch (error) {
+          console.error('❌ 解析 Qwen-VL 响应失败:', error.message)
           reject(new Error(`解析响应失败: ${error.message}`))
         }
       })
     })
 
+    // 设置 90 秒超时（VL 模型需要更长时间处理）
+    req.setTimeout(90000, () => {
+      console.error('❌ Qwen-VL 请求超时（90秒）')
+      req.destroy()
+      reject(new Error('API请求超时（90秒）'))
+    })
+
     req.on('error', (error) => {
+      console.error('❌ Qwen-VL 请求错误:', error.message)
       reject(error)
     })
 
+    console.log('📤 发送请求数据...')
     req.write(postData)
     req.end()
+    console.log('✉️ 请求已发送，等待响应...')
   })
 }

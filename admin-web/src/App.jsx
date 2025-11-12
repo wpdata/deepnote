@@ -8,6 +8,8 @@ import Questions from './pages/Questions'
 import Upload from './pages/Upload'
 import Statistics from './pages/Statistics'
 import UserLogs from './pages/UserLogs'
+import Users from './pages/Users'
+import Errors from './pages/Errors'
 import { checkLoginStatus } from './utils/cloudbase'
 
 // 路由守卫组件
@@ -35,6 +37,8 @@ function App() {
             <Route path="questions" element={<Questions />} />
             <Route path="upload" element={<Upload />} />
             <Route path="statistics" element={<Statistics />} />
+            <Route path="users" element={<Users />} />
+            <Route path="errors" element={<Errors />} />
             <Route path="logs" element={<UserLogs />} />
           </Route>
 
